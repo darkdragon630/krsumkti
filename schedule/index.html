@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi KRS UMK Teknik Informatika</title>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    </script>
+    <title>Jadwal Kuliah - UMK Teknik Informatika</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -40,7 +38,7 @@
         .container { max-width: 1320px; margin: 0 auto; }
         .kicker { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 10px; }
         h1 { text-align: left; color: var(--ink); font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; border-bottom: 4px solid var(--ink); padding-bottom: 20px; margin-bottom: 32px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        h1::after { content: "SEM. 1 / 3 / 5 / 7 / 8"; font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.05em; color: var(--red); text-transform: none; white-space: nowrap; }
+        h1::after { content: "JADWAL KULIAH"; font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.05em; color: var(--red); text-transform: none; white-space: nowrap; }
 
         .supabase-status { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 12px; padding: 6px 14px; border: 1px solid var(--line); background: var(--bg); margin-bottom: 20px; }
         .supabase-status .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -49,112 +47,7 @@
         .supabase-status .dot.loading { background: var(--orange); animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .upload-section { background: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 48px 40px; text-align: left; margin-bottom: 32px; position: relative; }
-        .upload-section::before { content: "01 — SUMBER DATA"; display: block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--red); margin-bottom: 24px; }
-        .upload-section input[type="file"] { padding: 10px 0; font-size: 14px; margin: 4px 0 20px; font-family: var(--mono); border: none; border-bottom: 1px solid var(--line); background: transparent; width: 100%; max-width: 420px; }
-        .btn-upload { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease, color 0.12s ease; }
-        .btn-upload:hover { background: var(--red); border-color: var(--red); }
-        .btn-sync { background: var(--purple); color: var(--surface); border: 1px solid var(--purple); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; margin-left: 12px; }
-        .btn-sync:hover { background: #4A1D7A; border-color: #4A1D7A; }
-        .btn-load { background: var(--blue); color: var(--surface); border: 1px solid var(--blue); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; margin-left: 12px; }
-        .btn-load:hover { background: #1A3B8A; border-color: #1A3B8A; }
-
-        .header-info { background: var(--ink); color: var(--surface); padding: 18px 24px; border-radius: 0; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-family: var(--mono); }
-        .header-info .total { font-size: 13px; letter-spacing: 0.02em; padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.25); }
-        .header-info .total:last-child { border-right: none; }
-        .header-info .total span { font-weight: 700; color: var(--surface); }
-        .header-info .sks-total { background: transparent; padding: 0; border-radius: 0; font-weight: 700; border-right: none; }
-        .header-info .sks-total span { color: var(--red); }
-
-        .tab-section { display: flex; gap: 0; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
-        .tab-btn { padding: 12px 28px 12px 0; margin-right: 32px; border: none; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; cursor: pointer; font-weight: 600; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); transition: color 0.12s ease, border-color 0.12s ease; }
-        .tab-btn:hover { color: var(--ink); }
-        .tab-btn.active { background: transparent; color: var(--ink); border-color: var(--red); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .main-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--grid-gap); }
-        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } h1 { flex-direction: column; align-items: flex-start; gap: 6px; } }
-
-        .card { background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 24px; margin-bottom: 24px; }
-        .card h2 { color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; border-bottom: 1px solid var(--ink); padding-bottom: 12px; }
-
-        .mk-group { margin-bottom: 12px; border: 1px solid var(--line); border-radius: 0; overflow: hidden; }
-        .mk-header { background: var(--bg); padding: 12px 16px; font-family: var(--mono); font-weight: 600; font-size: 13px; color: var(--ink); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 8px; }
-        .mk-header .mk-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .mk-header .mk-left .kategori-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 10px; border-radius: 0; }
-        .mk-header .mk-left .kategori-badge.wajib { background: var(--red-tint); color: var(--red); border: 1px solid var(--red); }
-        .mk-header .mk-left .kategori-badge.pilihan { background: var(--green-tint); color: var(--green); border: 1px solid var(--green); }
-        .mk-header .sks-badge-header { background: transparent; color: var(--ink); border: 1px solid var(--ink); padding: 2px 10px; border-radius: 0; font-size: 11px; font-family: var(--mono); }
-        .mk-header .taken-badge { background: transparent; color: var(--taken); border: 1px solid var(--taken); padding: 2px 10px; border-radius: 0; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
-        .mk-header .no-schedule-badge { background: transparent; color: var(--orange); border: 1px solid var(--orange); padding: 2px 10px; border-radius: 0; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
-        .mk-body { padding: 8px; }
-
-        .kelas-item { display: flex; align-items: center; padding: 10px 14px; margin: 4px 0; border-radius: 0; border: 1px solid var(--line); transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease; cursor: pointer; user-select: none; }
-        .kelas-item:hover { border-color: var(--ink); }
-        .kelas-item.selected { background: var(--ink); color: var(--surface); border-color: var(--ink); box-shadow: none; }
-        .kelas-item.selected .info .kelas-label, .kelas-item.selected .info .time { color: var(--surface); }
-        .kelas-item.selected .info .ruang, .kelas-item.selected .info .dosen { color: rgba(255,255,255,0.7); }
-        .kelas-item.selected .sks-badge { border-color: var(--surface); color: var(--surface); }
-        .kelas-item.taken { background: var(--taken-tint); border-color: var(--line); opacity: 0.75; cursor: not-allowed; }
-        .kelas-item.taken .info .kelas-label::after { content: " — DIAMBIL"; color: var(--taken); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; font-family: var(--mono); }
-        .kelas-item.no-schedule { background: var(--orange-tint); border-color: var(--orange); cursor: default; opacity: 0.7; }
-        .kelas-item.no-schedule .info .kelas-label::after { content: " — BELUM ADA JADWAL"; color: var(--orange); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; font-family: var(--mono); }
-        .kelas-item.no-schedule input[type="checkbox"] { accent-color: var(--orange); cursor: not-allowed; opacity: 0.5; }
-        .kelas-item input[type="checkbox"] { margin-right: 14px; accent-color: var(--ink); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
-        .kelas-item.taken input[type="checkbox"] { accent-color: var(--taken); cursor: not-allowed; }
-        .kelas-item .info { flex: 1; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
-        .kelas-item .info .kelas-label { font-weight: 700; font-family: var(--mono); color: var(--ink); min-width: 22px; }
-        .kelas-item .info .time { color: var(--ink-soft); font-size: 13px; font-family: var(--mono); }
-        .kelas-item .info .ruang { color: var(--ink-faint); font-size: 12px; font-family: var(--mono); }
-        .kelas-item .info .dosen { color: var(--ink-soft); font-size: 12px; }
-        .kelas-item .sks-badge { background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 2px 10px; border-radius: 0; font-size: 11px; font-weight: 600; font-family: var(--mono); flex-shrink: 0; }
-        .kelas-item.no-schedule .sks-badge { border-color: var(--orange); color: var(--orange); }
-
-        .summary-card { background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 24px; position: sticky; top: 24px; }
-        .summary-card h2 { color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; border-bottom: 1px solid var(--ink); padding-bottom: 12px; }
-        .summary-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; font-family: var(--mono); }
-        .summary-item .mk { font-weight: 500; }
-        .summary-item .kelas { color: var(--ink); font-weight: 700; }
-        .summary-item .kelas.taken { color: var(--taken); }
-        .summary-item .kelas.empty { color: var(--ink-faint); font-weight: 400; }
-        .summary-item .kelas.no-schedule { color: var(--orange); font-weight: 400; }
-        .summary-item .time { color: var(--ink-soft); }
-        .summary-total { margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--ink); font-weight: 700; font-size: 14px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.02em; }
-        .summary-conflict { color: var(--red); font-weight: 600; margin-top: 12px; padding: 12px 14px; background: var(--red-tint); border-radius: 0; border: 1px solid var(--red); font-size: 13px; }
-        .summary-conflict ul { margin-left: 18px; font-weight: 400; font-size: 12px; font-family: var(--mono); }
-        .summary-conflict li { color: var(--red); }
-
-        .sks-rekap { margin-top: 12px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); font-size: 13px; font-family: var(--mono); }
-        .sks-rekap .row { display: flex; justify-content: space-between; padding: 2px 0; }
-        .sks-rekap .row .label { color: var(--ink-soft); }
-        .sks-rekap .row .value { font-weight: 700; }
-        .sks-rekap .row .value.wajib { color: var(--red); }
-        .sks-rekap .row .value.pilihan { color: var(--green); }
-
-        .btn-save, .btn-export-img, .btn-reset, .btn-share-action, .btn-save-db { border-radius: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; width: 100%; transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease; }
-        .btn-save { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); padding: 13px 20px; margin-top: 18px; }
-        .btn-save:hover { background: var(--red); border-color: var(--red); }
-        .btn-export-img { background: var(--surface); color: var(--ink); border: 1px solid var(--ink); padding: 12px 20px; margin-top: 10px; }
-        .btn-export-img:hover { background: var(--ink); color: var(--surface); }
-        .btn-share-action { background: var(--blue); color: var(--surface); border: 1px solid var(--blue); padding: 12px 20px; margin-top: 10px; }
-        .btn-share-action:hover { background: #1A3B8A; border-color: #1A3B8A; }
-        .btn-save-db { background: var(--purple); color: var(--surface); border: 1px solid var(--purple); padding: 12px 20px; margin-top: 10px; }
-        .btn-save-db:hover { background: #4A1D7A; border-color: #4A1D7A; }
-        .btn-load-pilihan { background: var(--green); color: var(--surface); border: 1px solid var(--green); padding: 12px 20px; margin-top: 10px; }
-        .btn-load-pilihan:hover { background: #1E5A38; border-color: #1E5A38; }
-        .btn-reset { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); padding: 10px 16px; margin-top: 10px; }
-        .btn-reset:hover { border-color: var(--ink); color: var(--ink); }
-
-        #output-area { margin-top: 20px; padding: 16px; background: var(--bg); border-radius: 0; border: 1px solid var(--line); font-family: var(--mono); font-size: 12px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
-
-        #share-link-area { margin-top: 12px; padding: 12px 14px; background: var(--blue-tint); border: 1px solid var(--blue); display: none; font-family: var(--mono); font-size: 12px; word-break: break-all; }
-        #share-link-area .link-label { font-weight: 600; color: var(--blue); text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
-        #share-link-area .link-url { color: var(--ink); margin-top: 4px; }
-        #share-link-area .btn-copy-link { background: var(--blue); color: white; border: none; padding: 4px 16px; font-size: 11px; font-family: var(--mono); cursor: pointer; margin-top: 6px; }
-        #share-link-area .btn-copy-link:hover { background: #1A3B8A; }
-
-        #jadwal-mingguan { background: var(--surface); padding: 32px; border: 1px solid var(--ink); border-radius: 0; margin-top: 24px; font-family: var(--sans); display: none; }
+        #jadwal-mingguan { background: var(--surface); padding: 32px; border: 1px solid var(--ink); border-radius: 0; margin-top: 24px; font-family: var(--sans); display: block; }
         #jadwal-mingguan .judul { text-align: left; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; color: var(--ink); margin-bottom: 4px; }
         #jadwal-mingguan .sub-judul { text-align: left; font-size: 12px; font-family: var(--mono); color: var(--ink-soft); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--ink); }
         #jadwal-mingguan table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -178,54 +71,17 @@
         .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--surface); padding: 14px 22px; border-radius: 0; border-left: 4px solid var(--red); box-shadow: none; display: none; z-index: 999; font-family: var(--mono); font-size: 13px; animation: slideUp 0.2s ease; }
         @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .legend { display: flex; gap: 24px; flex-wrap: wrap; padding: 12px 0 20px; font-size: 12px; font-family: var(--mono); border-bottom: 1px solid var(--line); margin-bottom: 24px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
-        .legend-color { width: 14px; height: 14px; border-radius: 0; border: 1px solid var(--line); }
-        .legend-color.selected { background: var(--ink); border-color: var(--ink); }
-        .legend-color.taken { background: var(--taken-tint); border-color: var(--taken); }
-        .legend-color.available { background: var(--surface); border-color: var(--line); }
-        .legend-color.no-schedule { background: var(--orange-tint); border-color: var(--orange); }
-
-        .hidden { display: none !important; }
-
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,10,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .loading-overlay .spinner { background: var(--surface); padding: 32px 44px; border-radius: 0; text-align: center; }
         .loading-overlay .spinner .spin { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--line); border-top: 3px solid var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-overlay .spinner p { margin-top: 12px; color: var(--ink); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-
-        .storage-indicator { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-faint); text-transform: uppercase; }
-        .db-status { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 12px; border-radius: 0; }
-        .db-status.saved { background: var(--green-tint); color: var(--green); border: 1px solid var(--green); }
-        .db-status.error { background: var(--red-tint); color: var(--red); border: 1px solid var(--red); }
-        .db-status.synced { background: var(--blue-tint); color: var(--blue); border: 1px solid var(--blue); }
-
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .btn-group .btn-save-db, .btn-group .btn-share-action, .btn-group .btn-load-pilihan { flex: 1; min-width: 120px; }
-        .user-id-hint { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); margin-top: 6px; letter-spacing: 0.03em; }
-
-        .login-section { background: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 48px 40px; text-align: left; margin-bottom: 32px; position: relative; max-width: 480px; }
-        .login-section::before { content: "00 — MASUK AKUN"; display: block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--red); margin-bottom: 24px; }
-        .login-section h3 { color: var(--ink); margin-bottom: 8px; font-weight: 700; }
-        .login-section p { color: var(--ink-soft); margin-bottom: 18px; font-size: 13px; line-height: 1.6; }
-        .login-field { margin-bottom: 16px; }
-        .login-field label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
-        .login-field input { width: 100%; padding: 10px 0; font-size: 15px; font-family: var(--mono); border: none; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); }
-        .login-field input:focus { outline: none; border-bottom: 1px solid var(--ink); }
-        .btn-login { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; width: 100%; margin-top: 6px; }
-        .btn-login:hover { background: var(--red); border-color: var(--red); }
-        .login-note { margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); border-top: 1px solid var(--line); padding-top: 14px; line-height: 1.6; }
-
-        .account-bar { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 12px; padding: 10px 16px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); margin-bottom: 20px; flex-wrap: wrap; }
-        .account-bar .nim-tag { font-weight: 700; letter-spacing: 0.04em; }
-        .account-bar .btn-logout { margin-left: auto; background: transparent; color: var(--surface); border: 1px solid rgba(255,255,255,0.4); padding: 5px 14px; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
-        .account-bar .btn-logout:hover { border-color: var(--surface); }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="kicker">UMK — Teknik Informatika</div>
-    <h1>Simulasi KRS</h1>
+    <h1>Jadwal Kuliah</h1>
 
     <div class="supabase-status" id="supabaseStatus">
         <span class="dot loading" id="statusDot"></span>
@@ -233,113 +89,24 @@
         <span id="dbInfo" style="margin-left:auto;font-size:11px;color:var(--ink-faint);"></span>
     </div>
 
-    <div class="account-bar" id="accountBar" style="display:none;">
-        <span>Masuk sebagai NIM</span>
-        <span class="nim-tag" id="nim-display"></span>
-        <span id="db-status-indicator" class="db-status" style="display:none;">☁️ Tersimpan di Cloud</span>
-        <button type="button" class="btn-logout" onclick="logoutAccount()">Ganti Akun</button>
-    </div>
-
-    <div class="login-section" id="loginSection">
-        <h3>Masuk dengan NIM</h3>
-        <p>Ketik NIM dan password kamu. Kalau NIM ini belum pernah dipakai, akun baru akan otomatis dibuat dengan password yang kamu ketik — jadi cukup ingat NIM &amp; password ini untuk simulasi berikutnya, di device manapun. Data jadwal mata kuliah otomatis dimuat dari database setelah kamu masuk.</p>
-        <div class="login-field">
-            <label for="nimInput">NIM</label>
-            <input type="text" id="nimInput" inputmode="numeric" autocomplete="username" placeholder="cth. 21102001">
-        </div>
-        <div class="login-field">
-            <label for="passInput">Password</label>
-            <input type="password" id="passInput" autocomplete="current-password" placeholder="Password kamu">
-        </div>
-        <button class="btn-login" onclick="handleLogin()">Masuk / Daftar</button>
-        <div class="login-note">Catatan keamanan: password disimpan sebagai hash SHA-256 di Supabase, bukan Supabase Auth penuh — jangan pakai password yang sama dengan akun penting lain.</div>
-    </div>
-
-    <div class="info-section" id="emptyCatalogNotice" style="display:none;">
-        <h3 style="color:var(--ink);margin-bottom:10px;font-weight:700;">Katalog mata kuliah belum tersedia</h3>
-        <p style="color:var(--ink-soft);">Belum ada data jadwal di database. Hubungi admin akademik untuk mengisi tabel <code>mata_kuliah</code> terlebih dahulu — mahasiswa tidak bisa mengunggah atau mengubah data jadwal dari halaman ini.</p>
-        <button type="button" class="btn-reset" style="width:auto;margin-top:14px;" onclick="afterLogin(currentNim)">🔄 Coba Muat Ulang</button>
-    </div>
-
-    <div id="mainContent" class="hidden">
-        <div class="header-info">
-            <div class="total">Total <span id="total-mk-display">0</span> mata kuliah</div>
-            <div class="total">Sudah diambil: <span id="taken-display">0</span> MK</div>
-            <div class="total sks-total">Total SKS: <span id="total-sks-display">0</span></div>
-            <div class="total" id="status-display">Belum ada bentrok</div>
-            <div class="total" id="storage-indicator-live" style="border-right:none;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.55);">—</div>
-        </div>
-
-        <div class="legend">
-            <div class="legend-item"><div class="legend-color available"></div><span>Tersedia (belum dipilih)</span></div>
-            <div class="legend-item"><div class="legend-color selected"></div><span>Dipilih</span></div>
-            <div class="legend-item"><div class="legend-color taken"></div><span>Sudah Diambil</span></div>
-            <div class="legend-item"><div class="legend-color no-schedule"></div><span>Belum Ada Jadwal</span></div>
-        </div>
-
-        <div class="tab-section">
-            <button class="tab-btn active" data-tab="tab1" onclick="switchTab('tab1')">Semester 1</button>
-            <button class="tab-btn" data-tab="tab3" onclick="switchTab('tab3')">Semester 3</button>
-            <button class="tab-btn" data-tab="tab5" onclick="switchTab('tab5')">Semester 5</button>
-            <button class="tab-btn" data-tab="tab7" onclick="switchTab('tab7')">Semester 7</button>
-            <button class="tab-btn" data-tab="tab8" onclick="switchTab('tab8')">Semester 8</button>
-        </div>
-
-        <div class="main-layout">
-            <div>
-                <div class="card">
-                    <h2>02 — Pilih Kelas · klik untuk toggle, klik lagi untuk batal</h2>
-                    <div id="tab1" class="tab-content active"><div id="mk-list-1"></div></div>
-                    <div id="tab3" class="tab-content"><div id="mk-list-3"></div></div>
-                    <div id="tab5" class="tab-content"><div id="mk-list-5"></div></div>
-                    <div id="tab7" class="tab-content"><div id="mk-list-7"></div></div>
-                    <div id="tab8" class="tab-content"><div id="mk-list-8"></div></div>
-                </div>
-            </div>
-
-            <div>
-                <div class="summary-card">
-                    <h2>03 — Ringkasan Pilihan</h2>
-                    <div id="summary-list"></div>
-                    <div id="sks-rekap-container"></div>
-                    <div class="btn-group">
-                        <button class="btn-save-db" onclick="savePilihanToSupabase()">☁️ Simpan Pilihan</button>
-                        <button class="btn-load-pilihan" onclick="loadPilihanFromSupabase()">📥 Muat Pilihan</button>
-                        <button class="btn-share-action" onclick="generateShareLink()">🔗 Bagikan</button>
-                    </div>
-                    <div class="user-id-hint" id="user-id-hint"></div>
-                    <button class="btn-save" onclick="saveSelection()">💾 Simpan Pilihan (JSON)</button>
-                    <button class="btn-export-img" onclick="exportImage()">🖼️ Export JPG</button>
-                    <div id="share-link-area">
-                        <div class="link-label">🔗 Link Berbagi</div>
-                        <div class="link-url" id="share-link-url"></div>
-                        <button class="btn-copy-link" onclick="copyShareLink()">📋 Salin Link</button>
-                    </div>
-                    <button class="btn-reset" onclick="resetSelection()">Reset Semua</button>
-                    <div id="output-area"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="jadwal-mingguan">
-            <div class="judul">Jadwal Kuliah</div>
-            <div class="sub-judul" id="jadwal-subjudul">Semester 1 / 3 / 5 / 7 / 8</div>
-            <table>
-                <thead><tr><th style="width:80px;">HARI</th><th>JADWAL KULIAH</th></tr></thead>
-                <tbody id="jadwal-body">
-                    <tr><td class="hari-label">SENIN</td><td id="senin"></td></tr>
-                    <tr><td class="hari-label">SELASA</td><td id="selasa"></td></tr>
-                    <tr><td class="hari-label">RABU</td><td id="rabu"></td></tr>
-                    <tr><td class="hari-label">KAMIS</td><td id="kamis"></td></tr>
-                    <tr><td class="hari-label">JUMAT</td><td id="jumat"></td></tr>
-                    <tr><td class="hari-label">SABTU</td><td id="sabtu"></td></tr>
-                    <tr><td class="hari-label">MINGGU</td><td id="minggu"></td></tr>
-                </tbody>
-            </table>
-            <div class="footer">
-                <span>Total SKS: <span id="footer-sks">0</span></span>
-                <span id="footer-info"></span>
-            </div>
+    <div id="jadwal-mingguan">
+        <div class="judul">Jadwal Kuliah</div>
+        <div class="sub-judul" id="jadwal-subjudul">Memuat jadwal...</div>
+        <table>
+            <thead><tr><th style="width:80px;">HARI</th><th>JADWAL KULIAH</th></tr></thead>
+            <tbody id="jadwal-body">
+                <tr><td class="hari-label">SENIN</td><td id="senin"></td></tr>
+                <tr><td class="hari-label">SELASA</td><td id="selasa"></td></tr>
+                <tr><td class="hari-label">RABU</td><td id="rabu"></td></tr>
+                <tr><td class="hari-label">KAMIS</td><td id="kamis"></td></tr>
+                <tr><td class="hari-label">JUMAT</td><td id="jumat"></td></tr>
+                <tr><td class="hari-label">SABTU</td><td id="sabtu"></td></tr>
+                <tr><td class="hari-label">MINGGU</td><td id="minggu"></td></tr>
+            </tbody>
+        </table>
+        <div class="footer">
+            <span>Total SKS: <span id="footer-sks">0</span></span>
+            <span id="footer-info"></span>
         </div>
     </div>
 </div>
@@ -351,7 +118,7 @@
 
 <script>
     // ============================================
-    // SUPABASE CONFIG - SUDAH PAKAI PUNYA ANDA
+    // SUPABASE CONFIG
     // ============================================
     const SUPABASE_URL = 'https://wfxudgybbrsibzfyegcl.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVkZ3liYnJzaWJ6ZnllZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTQ3ODYsImV4cCI6MjEwMDc5MDc4Nn0.zZoM5I0GMJsD0huuWLR-ygCFxbSW2oWa5cqNEtrxvVA';
@@ -360,10 +127,6 @@
     let supabaseConnected = false;
 
     try {
-        // FIX: SDK Supabase v2 dari CDN mendaftarkan objek global bernama
-        // `supabase`, bukan `supabase_js`. Sebelumnya kode ini memanggil
-        // `supabase_js.createClient(...)` yang menyebabkan
-        // "supabase_js is not defined".
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         supabaseConnected = true;
         document.getElementById('statusDot').className = 'dot connected';
@@ -377,339 +140,18 @@
     }
 
     // ============================================
-    // SEMESTER MAPPING
+    // STATE (Hanya untuk menampung data jadwal)
     // ============================================
-    const SEMESTER_CODES = {
-        1: ['IFE101','IFE103','IFE105','IFE107','IFE109','IFE111','IFE113','IFE115'],
-        3: ['IFE201','IFE203','IFE205','IFE207','IFE209','IFE211','IFE213','IFE215','MKW201'],
-        5: ['IFE301','IFE303','IFE305','IFE307','IFE309','IFE311','IFE313','MKW301','OAI301','OAI303','OAI305','OSE301'],
-        7: ['FTI401','FTI403','IFT711','OAI401','ONE401','ONE403','OSE403','UMK401'],
-        8: ['IFE404','IFT802'],
-    };
     const ALL_SEMESTERS = [1,3,5,7,8];
-    const LIST_IDS = {1:'mk-list-1',3:'mk-list-3',5:'mk-list-5',7:'mk-list-7',8:'mk-list-8'};
-
-    // ============================================
-    // STATE
-    // ============================================
     let data = {1:[],3:[],5:[],7:[],8:[]};
-    let selected = {1:{},3:{},5:{},7:{},8:{}};
-    let taken = {};
-    let currentTab = 'tab1';
-    let fileStatusText = 'Belum ada file dipilih';
-    const STORAGE_KEY = 'krs_simulasi_state_v7';
-    const NIM_STORAGE_KEY = 'krs_logged_in_nim_v1';
-    const AUTH_TABLE = 'mahasiswa_akun';
-    let currentNim = null;
-    // Hosting statis di Wasmer (provider: staticfile) TIDAK punya opsi
-    // SPA-fallback/rewrite di app.yaml, jadi path cantik (/schedule/xxx) akan
-    // 404 di server sebelum JS sempat jalan. Karena itu link berbagi pakai
-    // query param di root ("/?s=xxx") yang selalu aman di static hosting apa pun.
-    const SHARE_QUERY_PARAM = 's';
-    let storageAvailable = true;
-    let dbSaved = false;
 
     // ============================================
-    // USER ID = NIM mahasiswa yang sedang login.
-    // "Simpan Pilihan" / "Muat Pilihan" dikaitkan ke NIM ini
-    // supaya bisa dibuka lagi dari device manapun dengan NIM+password yang sama.
+    // LOAD FROM SHARE ID
     // ============================================
-    function getUserId() {
-        if (!currentNim) { showToast('⚠️ Silakan masuk dengan NIM dulu.'); throw new Error('Belum login'); }
-        return currentNim;
-    }
-
-    // Generator kode acak pendek (dipakai untuk share id)
-    function generateShareId(length = 7) {
-        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; // tanpa 0/O/1/l/I biar gak ambigu
-        let result = '';
-        const arr = new Uint32Array(length);
-        crypto.getRandomValues(arr);
-        for (let i = 0; i < length; i++) result += chars[arr[i] % chars.length];
-        return result;
-    }
-
-    // Hash password dengan SHA-256 (Web Crypto). Tidak sekuat bcrypt/Supabase Auth,
-    // tapi cukup untuk mencegah password tersimpan sebagai plain text.
-    async function hashPassword(password) {
-        const enc = new TextEncoder().encode(password);
-        const buf = await crypto.subtle.digest('SHA-256', enc);
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    // Login kalau NIM sudah terdaftar (cocokkan hash password),
-    // atau daftar otomatis kalau NIM ini belum pernah dipakai.
-    async function handleLogin() {
-        const nimInput = document.getElementById('nimInput').value.trim();
-        const passInput = document.getElementById('passInput').value;
-        if (!nimInput || !passInput) { showToast('NIM dan password wajib diisi.'); return; }
-        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
-        try {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            const hash = await hashPassword(passInput);
-            const { data: existing, error: selErr } = await supabaseClient.from(AUTH_TABLE).select('*').eq('nim', nimInput).maybeSingle();
-            if (selErr) throw selErr;
-
-            if (existing) {
-                if (existing.password_hash !== hash) {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    showToast('❌ Password salah untuk NIM ' + nimInput + '.');
-                    return;
-                }
-            } else {
-                const { error: insErr } = await supabaseClient.from(AUTH_TABLE).insert({ nim: nimInput, password_hash: hash });
-                if (insErr) throw insErr;
-            }
-
-            document.getElementById('loadingOverlay').style.display = 'none';
-            showToast(existing ? ('✅ Berhasil masuk sebagai ' + nimInput) : ('✅ Akun baru dibuat untuk NIM ' + nimInput));
-            await afterLogin(nimInput);
-        } catch (err) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            console.error(err);
-            showToast('❌ Gagal masuk: ' + err.message);
-        }
-    }
-
-    // Dipanggil setelah login/registrasi berhasil, atau saat auto-login dari localStorage.
-    async function afterLogin(nim) {
-        currentNim = nim;
-        try { localStorage.setItem(NIM_STORAGE_KEY, nim); } catch (e) {}
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('accountBar').style.display = 'flex';
-        document.getElementById('nim-display').textContent = nim;
-        const hint = document.getElementById('user-id-hint');
-        if (hint) hint.textContent = 'Pilihan disimpan untuk NIM ' + nim;
-
-        let hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
-        if (!hasCatalog) {
-            restoreState();
-            hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
-        }
-        if (!hasCatalog && supabaseConnected) {
-            await loadFromSupabase();
-            hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
-        }
-        if (hasCatalog) {
-            showApp();
-            if (supabaseConnected) await loadPilihanFromSupabase();
-        } else {
-            document.getElementById('emptyCatalogNotice').style.display = '';
-        }
-    }
-
-    function logoutAccount() {
-        currentNim = null;
-        try { localStorage.removeItem(NIM_STORAGE_KEY); } catch (e) {}
-        document.getElementById('accountBar').style.display = 'none';
-        document.getElementById('loginSection').style.display = '';
-        document.getElementById('emptyCatalogNotice').style.display = 'none';
-        document.getElementById('mainContent').classList.add('hidden');
-        document.getElementById('nimInput').value = '';
-        document.getElementById('passInput').value = '';
-        showToast('Berhasil keluar. Masuk lagi dengan NIM & password.');
-    }
-
-    // ============================================
-    // SUPABASE FUNCTIONS
-    // ============================================
-    async function loadFromSupabase() {
-        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
-        try {
-            showToast('📥 Memuat data dari Supabase...');
-            document.getElementById('loadingOverlay').style.display = 'flex';
-
-            const { data: mkData, error: err } = await supabaseClient
-                .from('mata_kuliah')
-                .select('*')
-                .order('semester');
-
-            if (err) throw err;
-
-            if (!mkData || mkData.length === 0) {
-                document.getElementById('loadingOverlay').style.display = 'none';
-                return;
-            }
-
-            // Reset data
-            data = {1:[],3:[],5:[],7:[],8:[]};
-            selected = {1:{},3:{},5:{},7:{},8:{}};
-            taken = {};
-
-            // Populate data
-            for (let item of mkData) {
-                const sem = item.semester;
-                if (!data[sem]) data[sem] = [];
-                data[sem].push({
-                    no: item.no || '',
-                    kode: item.kode,
-                    kelas: item.kelas,
-                    nama: item.nama,
-                    hari: item.hari || 'Tidak tersedia',
-                    jam: item.jam || 'Tidak tersedia',
-                    ruang: item.ruang || 'Tidak tersedia',
-                    dosen: item.dosen || '',
-                    sks: item.sks || '0',
-                    sks_detail: item.sks_detail || '',
-                    kategori: item.kategori || 'Wajib',
-                    data_id: item.data_id || '',
-                });
-            }
-
-            fileStatusText = '📥 Dimuat dari Supabase (' + mkData.length + ' data)';
-            document.getElementById('db-status-indicator').style.display = 'inline-block';
-            document.getElementById('db-status-indicator').className = 'db-status synced';
-            document.getElementById('db-status-indicator').textContent = '📥 ' + mkData.length + ' data dimuat';
-
-            saveState();
-            document.getElementById('loadingOverlay').style.display = 'none';
-        } catch (err) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            console.error(err);
-            showToast('❌ Gagal load: ' + err.message);
-        }
-    }
-
-    // ============================================
-    // PILIHAN USER (tabel krs_pilihan)
-    // ============================================
-    async function savePilihanToSupabase() {
-        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
-        const items = getSelectedItems().filter(item => item.status === 'selected');
-        if (items.length === 0) { showToast('Belum ada pilihan kelas untuk disimpan.'); return; }
-        try {
-            showToast('☁️ Menyimpan pilihan ke Cloud...');
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            const uid = getUserId();
-
-            // Ganti semua baris lama milik user ini dengan pilihan yang sekarang
-            const { error: delErr } = await supabaseClient.from('krs_pilihan').delete().eq('user_id', uid);
-            if (delErr) throw delErr;
-
-            const rows = items.map(item => ({
-                user_id: uid,
-                kode: item.kode,
-                kelas: item.kelas,
-                semester: item.semester,
-                status: 'dipilih',
-            }));
-            const { error: insErr } = await supabaseClient.from('krs_pilihan').insert(rows);
-            if (insErr) throw insErr;
-
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('db-status-indicator').style.display = 'inline-block';
-            document.getElementById('db-status-indicator').className = 'db-status saved';
-            document.getElementById('db-status-indicator').textContent = '☁️ Pilihan tersimpan (' + rows.length + ')';
-            showToast('✅ ' + rows.length + ' pilihan berhasil disimpan ke Cloud!');
-        } catch (err) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            console.error(err);
-            showToast('❌ Gagal menyimpan pilihan: ' + err.message);
-        }
-    }
-
-    async function loadPilihanFromSupabase() {
-        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
-        const hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
-        if (!hasCatalog) { showToast('⚠️ Muat data mata kuliah dulu sebelum memuat pilihan.'); return; }
-        try {
-            showToast('📥 Memuat pilihan tersimpan...');
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            const uid = getUserId();
-            const { data: rows, error: err } = await supabaseClient.from('krs_pilihan').select('*').eq('user_id', uid);
-            document.getElementById('loadingOverlay').style.display = 'none';
-            if (err) throw err;
-            if (!rows || rows.length === 0) { showToast('⚠️ Belum ada pilihan tersimpan untuk kamu di Cloud.'); return; }
-
-            rows.forEach(r => {
-                const sem = r.semester;
-                if (!selected[sem]) selected[sem] = {};
-                selected[sem][r.kode] = r.kelas;
-            });
-            renderAll(); updateSummary(); updateJadwalMingguan(); saveState();
-            showToast('✅ ' + rows.length + ' pilihan berhasil dimuat dari Cloud!');
-        } catch (err) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            console.error(err);
-            showToast('❌ Gagal memuat pilihan: ' + err.message);
-        }
-    }
-
-    // ============================================
-    // SHARE LINK FUNCTIONS
-    // ============================================
-    async function generateShareLink() {
-        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa membuat link singkat.'); return; }
-        const items = getSelectedItems().filter(item => item.status === 'selected');
-        if (items.length === 0) { showToast('Belum ada pilihan kelas untuk dibagikan.'); return; }
-        const payload = items.map(item => ({
-            k: item.kode,
-            kl: item.kelas,
-            n: item.nama,
-            h: item.hari,
-            j: item.jam,
-            r: item.ruang,
-            ds: item.dosen || '',
-            s: item.sks,
-            sk: item.sks_detail || '',
-            kat: item.kategori || 'Wajib',
-            sem: item.semester,
-            no: item.no || ''
-        }));
-        try {
-            showToast('🔗 Membuat link berbagi...');
-            document.getElementById('loadingOverlay').style.display = 'flex';
-
-            let shareId = null, lastErr = null;
-            // Coba beberapa kali kalau kebetulan share_id-nya sudah dipakai (unique constraint)
-            for (let attempt = 0; attempt < 5 && !shareId; attempt++) {
-                const candidate = generateShareId(7);
-                const { error: err } = await supabaseClient.from('krs_shared').insert({
-                    share_id: candidate,
-                    user_id: getUserId(),
-                    data: payload,
-                });
-                if (!err) { shareId = candidate; }
-                else if (err.code === '23505') { lastErr = err; continue; }
-                else { lastErr = err; break; }
-            }
-            document.getElementById('loadingOverlay').style.display = 'none';
-            if (!shareId) throw (lastErr || new Error('Gagal membuat kode berbagi yang unik.'));
-
-            const shareUrl = window.location.origin + window.location.pathname + '?' + SHARE_QUERY_PARAM + '=' + shareId;
-            const area = document.getElementById('share-link-area');
-            area.style.display = 'block';
-            document.getElementById('share-link-url').textContent = shareUrl;
-            area.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            showToast('🔗 Link berbagi berhasil dibuat!');
-        } catch (err) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            console.error(err);
-            showToast('❌ Gagal membuat link berbagi: ' + err.message);
-        }
-    }
-
-    function copyShareLink() {
-        const url = document.getElementById('share-link-url').textContent;
-        navigator.clipboard.writeText(url).then(() => {
-            showToast('📋 Link berhasil disalin!');
-        }).catch(() => {
-            const range = document.createRange();
-            const sel = window.getSelection();
-            const el = document.getElementById('share-link-url');
-            range.selectNodeContents(el);
-            sel.removeAllRanges();
-            sel.addRange(range);
-            document.execCommand('copy');
-            showToast('📋 Link berhasil disalin!');
-        });
-    }
-
-    // Muat jadwal dari share_id yang tersimpan di tabel krs_shared (link pendek /schedule/{id})
     async function loadFromShareId(shareId) {
-        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa memuat link berbagi.'); return; }
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa memuat jadwal.'); return; }
         try {
-            showToast('📋 Memuat jadwal dari link berbagi...');
+            showToast('📋 Memuat jadwal...');
             document.getElementById('loadingOverlay').style.display = 'flex';
             const { data: row, error: err } = await supabaseClient
                 .from('krs_shared')
@@ -718,51 +160,21 @@
                 .maybeSingle();
             document.getElementById('loadingOverlay').style.display = 'none';
             if (err) throw err;
-            if (!row) { showToast('⚠️ Link tidak ditemukan (mungkin salah ketik atau sudah dihapus).'); return; }
-            if (row.expires_at && new Date(row.expires_at) < new Date()) { showToast('⚠️ Link berbagi ini sudah kedaluwarsa.'); return; }
+            if (!row) { showToast('⚠️ Jadwal tidak ditemukan.'); return; }
+            if (row.expires_at && new Date(row.expires_at) < new Date()) { showToast('⚠️ Link jadwal ini sudah kedaluwarsa.'); return; }
 
             applySharedPayload(row.data || []);
-            fileStatusText = '📋 Dimuat dari link berbagi (' + shareId + ')';
-            showApp();
-            saveState();
-            showToast('✅ Jadwal berhasil dimuat dari link!');
-            const url = new URL(window.location.href);
-            url.searchParams.delete(SHARE_QUERY_PARAM);
-            window.history.replaceState({}, '', url.toString());
+            updateJadwalMingguan();
+            showToast('✅ Jadwal berhasil dimuat!');
         } catch (err) {
             document.getElementById('loadingOverlay').style.display = 'none';
             console.error(err);
-            showToast('❌ Gagal memuat link: ' + err.message);
+            showToast('❌ Gagal memuat jadwal: ' + err.message);
         }
     }
 
-    // Fallback untuk link lama berformat ?share=<base64> (kalau masih ada yang beredar)
-    function loadFromShareLink() {
-        const url = new URL(window.location.href);
-        const shareParam = url.searchParams.get('share');
-        if (!shareParam) { showToast('⚠️ Tidak ada link yang valid.'); return; }
-        try {
-            const decoded = decodeURIComponent(shareParam);
-            const payload = JSON.parse(decoded);
-            if (payload.v !== 2 || !payload.d || !Array.isArray(payload.d)) { showToast('⚠️ Format link tidak valid.'); return; }
-            applySharedPayload(payload.d);
-            fileStatusText = '📋 Dimuat dari link berbagi (lama)';
-            showApp();
-            saveState();
-            showToast('✅ Jadwal berhasil dimuat dari link!');
-            url.searchParams.delete('share');
-            window.history.replaceState({}, '', url.toString());
-        } catch (err) {
-            console.error(err);
-            showToast('❌ Gagal memuat link: ' + err.message);
-        }
-    }
-
-    // Helper bersama: taruh array item {k,kl,n,h,j,r,ds,s,sk,kat,sem,no} ke state data/selected
     function applySharedPayload(items) {
         data = {1:[],3:[],5:[],7:[],8:[]};
-        selected = {1:{},3:{},5:{},7:{},8:{}};
-        taken = {};
         const semMap = {};
         (items || []).forEach(item => {
             const sem = item.sem || 5;
@@ -780,229 +192,35 @@
                 sks_detail: item.sk || '',
                 kategori: item.kat || 'Wajib',
             });
-            if (!selected[sem]) selected[sem] = {};
-            selected[sem][item.k] = item.kl;
         });
         for (let sem of ALL_SEMESTERS) {
             if (semMap[sem]) { data[sem] = semMap[sem]; }
         }
     }
 
-    function checkShareOnLoad() {
-        const url = new URL(window.location.href);
-
-        // Format baru (aman untuk static hosting apa pun): /?s={share_id}
-        const shortId = url.searchParams.get(SHARE_QUERY_PARAM);
-        if (shortId) { setTimeout(() => loadFromShareId(shortId), 300); return; }
-
-        // Format lama: ?share=<base64> — tetap didukung untuk link yang sudah terlanjur dibagikan
-        if (url.searchParams.has('share')) {
-            setTimeout(loadFromShareLink, 500);
-        }
-    }
-
     // ============================================
-    // SAVE / LOAD STATE
-    // ============================================
-    function saveState() {
-        if (!storageAvailable) return;
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({data, selected, taken, currentTab, fileStatusText})); updateStorageIndicator('saved'); } catch(e){ storageAvailable=false; }
-    }
-    function loadState() {
-        try { const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return null; return JSON.parse(raw); } catch(e){ storageAvailable=false; return null; }
-    }
-    function updateStorageIndicator(state) {
-        const m = { saved:['Tersimpan otomatis','var(--ink-faint)','Tersimpan otomatis'], restored:['Dipulihkan','var(--red)','Dipulihkan otomatis'], unavailable:['Penyimpanan tidak tersedia','var(--taken)','Penyimpanan tidak tersedia'], cleared:['Belum ada data','var(--ink-faint)','—'] };
-        const [uMsg,color,lMsg]=m[state]||m.cleared;
-        const lEl=document.getElementById('storage-indicator-live'); if(lEl) lEl.textContent=lMsg;
-    }
-    function showApp() {
-        document.getElementById('emptyCatalogNotice').style.display='none';
-        document.getElementById('mainContent').classList.remove('hidden');
-        renderAll(); updateSummary(); updateJadwalMingguan(); switchTab(currentTab);
-    }
-    function restoreState() {
-        const saved=loadState();
-        if(!saved||!saved.data) { updateStorageIndicator('cleared'); return false; }
-        let hasData = false;
-        for(let sem of ALL_SEMESTERS) { if(saved.data[sem]?.length) hasData = true; }
-        if(!hasData) { updateStorageIndicator('cleared'); return false; }
-        data=saved.data; selected=saved.selected||{}; taken=saved.taken||{}; currentTab=saved.currentTab||'tab1'; fileStatusText=saved.fileStatusText||'Data dipulihkan';
-        updateStorageIndicator('restored'); return true;
-    }
-
-    function initApp() {
-        selected={1:{},3:{},5:{},7:{},8:{}}; taken={}; currentTab='tab1';
-        showApp(); saveState();
-    }
-
-    // ============================================
-    // RENDER
+    // RENDER JADWAL MINGGUAN (Read Only)
     // ============================================
     function parseTime(t){ const m=t.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/); return m?{start:parseInt(m[1])*100+parseInt(m[2]), end:parseInt(m[3])*100+parseInt(m[4])}:null; }
-    function checkConflicts(items){ 
-        const conflicts=[], byDay={}; 
-        items.filter(item=>item.hari!=='Tidak tersedia').forEach(item=>{ 
-            if(!byDay[item.hari]) byDay[item.hari]=[]; 
-            byDay[item.hari].push(item); 
-        }); 
-        Object.keys(byDay).forEach(day=>{ const items2=byDay[day]; for(let i=0;i<items2.length;i++){ for(let j=i+1;j<items2.length;j++){ const t1=parseTime(items2[i].jam), t2=parseTime(items2[j].jam); if(t1&&t2&&!(t1.end<=t2.start||t2.end<=t1.start)) conflicts.push({hari:day,mk1:items2[i].kode+'-'+items2[i].kelas,jam1:items2[i].jam,mk2:items2[j].kode+'-'+items2[j].kelas,jam2:items2[j].jam}); } } }); 
-        return conflicts; 
-    }
 
-    function toggleKelas(semester,kode,kelas){
-        const sem = parseInt(semester);
-        const item = data[sem]?.find(i => i.kode === kode && i.kelas === kelas);
-        if(item && item.hari === 'Tidak tersedia') { showToast('⚠️ Mata kuliah ini belum memiliki jadwal.'); return; }
-        if(taken[kode]){ showToast('Mata kuliah ini sudah diambil.'); return; }
-        if(selected[sem][kode]===kelas) selected[sem][kode]=null;
-        else selected[sem][kode]=kelas;
-        renderAll(); updateSummary(); updateJadwalMingguan(); saveState();
-    }
-
-    function renderMKList(semester, containerId){
-        const container=document.getElementById(containerId);
-        const sem=parseInt(semester);
-        const items=data[sem]||[];
-        const semSelected=selected[sem]||{};
-        const groups={}; 
-        items.forEach(item=>{ 
-            if(!groups[item.kode]) groups[item.kode]=[]; 
-            groups[item.kode].push(item); 
-        });
-        let html='';
-        const groupKeys=Object.keys(groups);
-        if(groupKeys.length===0) html='<p style="color:#718096;text-align:center;padding:20px;">Tidak ada data untuk semester ini.</p>';
-        groupKeys.forEach(kode=>{
-            const group=groups[kode]; 
-            const name=group[0].nama; 
-            const sks=group[0].sks; 
-            const isTaken=taken[kode]||false; 
-            const kategori=group[0].kategori||'';
-            const allNoSchedule = group.every(item => item.hari === 'Tidak tersedia');
-            
-            const katClass=kategori.toLowerCase()==='pilihan'?'pilihan':'wajib';
-            html+=`<div class="mk-group"><div class="mk-header"><div class="mk-left"><span>${kode} — ${name}</span><span class="kategori-badge ${katClass}">${kategori||'Wajib'}</span></div><span>`;
-            if(isTaken) html+=`<span class="taken-badge">Sudah Diambil</span>`;
-            else if(allNoSchedule) html+=`<span class="no-schedule-badge">⏳ Belum Ada Jadwal</span>`;
-            else html+=`<span class="sks-badge-header">${sks} SKS</span>`;
-            html+=`</span></div><div class="mk-body">`;
-            
-            group.forEach(item=>{
-                const isSelected = semSelected[kode]===item.kelas && !isTaken;
-                const isNoSchedule = item.hari === 'Tidak tersedia';
-                const isDisabled = isTaken || isNoSchedule;
-                
-                let classes = 'kelas-item';
-                if(isSelected) classes += ' selected';
-                if(isTaken) classes += ' taken';
-                if(isNoSchedule) classes += ' no-schedule';
-                
-                html+=`<div class="${classes}" onclick="${!isDisabled ? `toggleKelas('${sem}','${kode}','${item.kelas}')` : ''}">
-                    <input type="checkbox" ${isSelected?'checked':''} ${isDisabled?'disabled':''} onclick="event.stopPropagation(); ${!isDisabled ? `toggleKelas('${sem}','${kode}','${item.kelas}')` : ''}">
-                    <div class="info">
-                        <span class="kelas-label">${item.kelas}</span>
-                        <span class="time">${item.hari} ${item.jam}</span>
-                        <span class="ruang">${item.ruang}</span>
-                        <span class="dosen">${item.dosen}</span>
-                    </div>
-                    <span class="sks-badge">${item.sks} SKS</span>
-                </div>`;
-            });
-            html+=`</div></div>`;
-        });
-        container.innerHTML=html;
-    }
-    function renderAll(){
-        for(let sem of ALL_SEMESTERS) {
-            renderMKList(sem, LIST_IDS[sem]);
-        }
-    }
-
-    function switchTab(tabId){
-        currentTab=tabId;
-        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        saveState();
-    }
-
-    function getSelectedItems(){
-        const r=[];
-        for(let sem of ALL_SEMESTERS){
-            const semData=data[sem]||[];
-            const semSelected=selected[sem]||{};
-            semData.forEach(item=>{
-                const isTaken=taken[item.kode]||false;
-                const isSelected=semSelected[item.kode]===item.kelas;
-                if(isTaken||isSelected) r.push({...item, semester:sem, status:isTaken?'taken':'selected'});
-            });
-        }
-        return r;
-    }
-
-    function updateSummary(){
-        const selectedItems=getSelectedItems();
-        let totalSKS=0, takenCount=0, selectedCount=0, wajibSKS=0, pilihanSKS=0;
-        selectedItems.forEach(item=>{
-            const s=parseInt(item.sks)||0; totalSKS+=s;
-            if(item.status==='taken') takenCount++;
-            else selectedCount++;
-            if(item.kategori && item.kategori.toLowerCase()==='pilihan') pilihanSKS+=s;
-            else wajibSKS+=s;
-        });
-        document.getElementById('total-sks-display').textContent=totalSKS;
-        document.getElementById('taken-display').textContent=takenCount;
-        let totalMK=0;
-        for(let sem of ALL_SEMESTERS) totalMK += (data[sem]||[]).length;
-        const availableMK=totalMK-takenCount;
-        document.getElementById('total-mk-display').textContent=availableMK+' (dari '+totalMK+')';
-
-        const summaryDiv=document.getElementById('summary-list');
-        let html='';
-        if(selectedItems.length===0) html='<p style="color:#718096;">Belum ada pilihan</p>';
-        else {
-            for(let sem of ALL_SEMESTERS){
-                const semItems=selectedItems.filter(i=>i.semester===sem);
-                if(semItems.length>0){
-                    html+=`<div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px;">Semester ${sem}</div>`;
-                    semItems.forEach(item=>{
-                        const label=item.status==='taken'?'✓':item.kelas;
-                        const cls = item.hari === 'Tidak tersedia' ? 'no-schedule' : (item.status==='taken'?'taken':'');
-                        html+=`<div class="summary-item"><span class="mk">${item.kode}</span><span class="kelas ${cls}">${label}</span><span class="time">${item.hari} ${item.jam}</span></div>`;
-                    });
-                }
-            }
-            html+=`<div class="summary-total">Total SKS: ${totalSKS} (${selectedCount} dipilih, ${takenCount} sudah diambil)</div>`;
-        }
-
-        const rekapDiv=document.getElementById('sks-rekap-container');
-        let rekapHtml=`<div class="sks-rekap"><div class="row"><span class="label">Wajib</span><span class="value wajib">${wajibSKS} SKS</span></div><div class="row"><span class="label">Pilihan</span><span class="value pilihan">${pilihanSKS} SKS</span></div><div class="row" style="border-top:1px solid var(--line);padding-top:4px;margin-top:4px;"><span class="label">Total</span><span class="value">${totalSKS} SKS</span></div></div>`;
-        rekapDiv.innerHTML=rekapHtml;
-
-        const selectedOnly=selectedItems.filter(item=>item.status!=='taken' && item.hari!=='Tidak tersedia');
-        const conflicts=checkConflicts(selectedOnly);
-        const statusDiv=document.getElementById('status-display');
-        if(conflicts.length>0){ statusDiv.innerHTML=conflicts.length+' bentrok ditemukan'; statusDiv.style.color='#e53e3e';
-            html+=`<div class="summary-conflict"><strong>Bentrok:</strong><ul>`; conflicts.forEach(c=>{ html+=`<li>${c.hari}: ${c.mk1} (${c.jam1}) bentrok dengan ${c.mk2} (${c.jam2})</li>`; }); html+=`</ul></div>`;
-        } else if(selectedCount>0){ statusDiv.innerHTML='Tidak ada bentrok'; statusDiv.style.color='#48bb78'; }
-        else { statusDiv.innerHTML='Belum ada pilihan'; statusDiv.style.color='#ecc94b'; }
-        summaryDiv.innerHTML=html;
-    }
-
-    // ============================================
-    // JADWAL MINGGUAN
-    // ============================================
     function updateJadwalMingguan(){
-        const selectedItems=getSelectedItems().filter(item=>item.status==='selected' && item.hari!=='Tidak tersedia');
-        const days=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
-        const dayMap={}; days.forEach(d=>dayMap[d]=[]);
+        const selectedItems = [];
+        for(let sem of ALL_SEMESTERS){
+            const semData = data[sem] || [];
+            semData.forEach(item => {
+                if(item.hari !== 'Tidak tersedia') {
+                    selectedItems.push(item);
+                }
+            });
+        }
+
+        const days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+        const dayMap = {}; days.forEach(d=>dayMap[d]=[]);
         selectedItems.forEach(item=>{ if(item.hari&&dayMap[item.hari]) dayMap[item.hari].push(item); });
         days.forEach(d=>{ dayMap[d].sort((a,b)=>{ const t1=parseTime(a.jam), t2=parseTime(b.jam); return(t1?t1.start:0)-(t2?t2.start:0); }); });
         let totalSKS=selectedItems.reduce((s,i)=>s+parseInt(i.sks||0),0);
         document.getElementById('footer-sks').textContent=totalSKS;
-        document.getElementById('footer-info').textContent=selectedItems.length+' mata kuliah dipilih';
+        document.getElementById('footer-info').textContent=selectedItems.length+' mata kuliah';
         days.forEach(day=>{
             const cell=document.getElementById(day.toLowerCase());
             const items=dayMap[day]||[];
@@ -1016,69 +234,19 @@
         document.getElementById('jadwal-subjudul').textContent='Semester 1 / 3 / 5 / 7 / 8 | Total SKS: '+totalSKS+' | '+selectedItems.length+' mata kuliah';
     }
 
-    function exportImage(){
-        const selectedItems=getSelectedItems().filter(item=>item.status==='selected' && item.hari!=='Tidak tersedia');
-        if(selectedItems.length===0){ showToast('Belum ada pilihan kelas yang memiliki jadwal.'); return; }
-        document.getElementById('jadwal-mingguan').style.display='block';
-        updateJadwalMingguan();
-        const overlay=document.getElementById('loadingOverlay');
-        overlay.style.display='flex';
-        setTimeout(()=>{
-            const el=document.getElementById('jadwal-mingguan');
-            html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:el.scrollWidth,height:el.scrollHeight,windowWidth:el.scrollWidth,windowHeight:el.scrollHeight}).then(canvas=>{
-                overlay.style.display='none';
-                const link=document.createElement('a');
-                link.download='jadwal_kuliah_'+new Date().toISOString().slice(0,10)+'.jpg';
-                link.href=canvas.toDataURL('image/jpeg',0.95);
-                link.click();
-                showToast('Gambar berhasil di-download.');
-            }).catch(err=>{ overlay.style.display='none'; console.error(err); showToast('Gagal export gambar: '+err.message); });
-        },500);
-    }
-
-    function saveSelection(){
-        const items=getSelectedItems();
-        const selectedOnly=items.filter(item=>item.status!=='taken');
-        if(selectedOnly.length===0){ showToast('Belum ada pilihan kelas.'); return; }
-        const output=document.getElementById('output-area');
-        let result='📋 RINGKASAN KRS\n'+'='.repeat(50)+'\n';
-        for(let sem of ALL_SEMESTERS){
-            const semItems=items.filter(i=>i.semester===sem);
-            if(semItems.length>0){
-                result+=`\nSEMESTER ${sem}:\n`;
-                semItems.forEach(item=>{
-                    const label=item.status==='taken'?'SUDAH DIAMBIL':item.kelas;
-                    const statusJadwal = item.hari==='Tidak tersedia' ? ' [BELUM ADA JADWAL]' : '';
-                    result+=`  ${item.kode}-${label}${statusJadwal} | ${item.nama} | ${item.hari} ${item.jam} | ${item.ruang} | ${item.dosen||'-'} | ${item.kategori||'Wajib'} | SKS: ${item.sks}\n`;
-                });
-            }
-        }
-        result+='='.repeat(50)+'\n';
-        const totalSKS=items.reduce((s,i)=>s+parseInt(i.sks||0),0);
-        result+=`Total SKS: ${totalSKS}\n`;
-        const conflicts=checkConflicts(items.filter(item=>item.status!=='taken' && item.hari!=='Tidak tersedia'));
-        if(conflicts.length>0){ result+='\nBENTROK DITEMUKAN:\n'; conflicts.forEach(c=>result+=`  - ${c.hari}: ${c.mk1} (${c.jam1}) bentrok dengan ${c.mk2} (${c.jam2})\n`); } else result+='\nTIDAK ADA BENTROK';
-        output.textContent=result;
-        const jsonData={timestamp:new Date().toISOString(), selected:items, total_sks:totalSKS, conflicts:conflicts};
-        const blob=new Blob([JSON.stringify(jsonData,null,2)],{type:'application/json'});
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download='krs_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url);
-        showToast('File JSON berhasil di-download.');
-    }
-
-    function resetSelection(){ selected={1:{},3:{},5:{},7:{},8:{}}; renderAll(); updateSummary(); updateJadwalMingguan(); document.getElementById('output-area').textContent=''; document.getElementById('jadwal-mingguan').style.display='none'; document.getElementById('share-link-area').style.display='none'; saveState(); showToast('Reset selesai'); }
     function showToast(msg){ const toast=document.getElementById('toast'); toast.textContent=msg; toast.style.display='block'; clearTimeout(toast._timeout); toast._timeout=setTimeout(()=>{ toast.style.display='none'; },3000); }
 
     // ============================================
-    // AUTO-RESTORE & SHARE CHECK
+    // DETECT SHARE ID FROM PATH & LOAD
     // ============================================
-    (function bootstrapAuth() {
-        let rememberedNim = null;
-        try { rememberedNim = localStorage.getItem(NIM_STORAGE_KEY); } catch (e) {}
-        if (rememberedNim) {
-            afterLogin(rememberedNim);
+    (function checkSchedulePath() {
+        const path = window.location.pathname;
+        if (path.startsWith('/schedule/')) {
+            const shareId = path.replace('/schedule/', '');
+            if (shareId && shareId.length > 0) {
+                setTimeout(() => loadFromShareId(shareId), 500);
+            }
         }
-        checkShareOnLoad();
     })();
 </script>
 </body>
