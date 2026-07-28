@@ -225,7 +225,7 @@
 <body>
 <div class="container">
     <div class="kicker">UMK — Teknik Informatika</div>
-    <h1>Simulasi KRS</h1>
+    <h1 id="mainTitle">Simulasi KRS</h1>
 
     <div class="supabase-status" id="supabaseStatus">
         <span class="dot loading" id="statusDot"></span>
@@ -829,10 +829,15 @@
             document.querySelector('.tab-section').style.display = 'none';
             document.querySelector('.main-layout').style.display = 'none'; // Hilangkan list MK dan tombol simpan
             
-            // Ubah judul halaman
-            document.querySelector('.kicker').style.display = 'none';
-            document.querySelector('h1').innerHTML = 'Jadwal Kuliah';
-            document.querySelector('h1::after').textContent = '';
+            // Ubah judul halaman dengan aman (cegah error null)
+            const titleEl = document.getElementById('mainTitle');
+            if (titleEl) {
+                titleEl.innerHTML = 'JADWAL KULIAH';
+                // Hapus pseudo-element ::after dengan menghapus class/style
+                titleEl.style.borderBottom = '4px solid var(--ink)';
+            }
+            const kickerEl = document.querySelector('.kicker');
+            if (kickerEl) kickerEl.style.display = 'none';
         }
 
         renderAll(); 
