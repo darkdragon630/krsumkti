@@ -203,6 +203,23 @@
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .btn-group .btn-save-db, .btn-group .btn-share-action, .btn-group .btn-load-pilihan { flex: 1; min-width: 120px; }
         .user-id-hint { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); margin-top: 6px; letter-spacing: 0.03em; }
+
+        .login-section { background: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 48px 40px; text-align: left; margin-bottom: 32px; position: relative; max-width: 480px; }
+        .login-section::before { content: "00 — MASUK AKUN"; display: block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--red); margin-bottom: 24px; }
+        .login-section h3 { color: var(--ink); margin-bottom: 8px; font-weight: 700; }
+        .login-section p { color: var(--ink-soft); margin-bottom: 18px; font-size: 13px; line-height: 1.6; }
+        .login-field { margin-bottom: 16px; }
+        .login-field label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+        .login-field input { width: 100%; padding: 10px 0; font-size: 15px; font-family: var(--mono); border: none; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); }
+        .login-field input:focus { outline: none; border-bottom: 1px solid var(--ink); }
+        .btn-login { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; width: 100%; margin-top: 6px; }
+        .btn-login:hover { background: var(--red); border-color: var(--red); }
+        .login-note { margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); border-top: 1px solid var(--line); padding-top: 14px; line-height: 1.6; }
+
+        .account-bar { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 12px; padding: 10px 16px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); margin-bottom: 20px; flex-wrap: wrap; }
+        .account-bar .nim-tag { font-weight: 700; letter-spacing: 0.04em; }
+        .account-bar .btn-logout { margin-left: auto; background: transparent; color: var(--surface); border: 1px solid rgba(255,255,255,0.4); padding: 5px 14px; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
+        .account-bar .btn-logout:hover { border-color: var(--surface); }
     </style>
 </head>
 <body>
@@ -216,21 +233,32 @@
         <span id="dbInfo" style="margin-left:auto;font-size:11px;color:var(--ink-faint);"></span>
     </div>
 
-    <div class="upload-section" id="uploadSection">
-        <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--ink-faint);margin-bottom:14px;">FILE .CSV</div>
-        <h3 style="color:var(--ink);margin-bottom:10px;font-weight:700;">Upload File CSV Jadwal</h3>
-        <p style="color:var(--ink-soft);margin-bottom:15px;">Upload file CSV dari hasil scraping (jadwal_all_semester.csv)</p>
-        <input type="file" id="csvFile" accept=".csv" style="margin-bottom:15px;">
-        <br>
-        <button class="btn-upload" onclick="loadCSV()">Upload &amp; Proses</button>
-        <button class="btn-sync" onclick="syncToSupabase()">☁️ Simpan ke Supabase</button>
-        <button class="btn-load" onclick="loadFromSupabase()">📥 Muat dari Supabase</button>
-        <div style="margin-top:15px;color:var(--ink-soft);font-size:13px;"><span id="file-status">Belum ada file dipilih</span></div>
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-            <span id="storage-indicator" class="storage-indicator">Belum ada data tersimpan</span>
-            <span id="db-status-indicator" class="db-status" style="display:none;">☁️ Tersimpan di Cloud</span>
-            <button type="button" onclick="clearSavedData()" style="background:transparent;border:1px solid var(--line);color:var(--ink-soft);padding:6px 14px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;">Hapus Data</button>
+    <div class="account-bar" id="accountBar" style="display:none;">
+        <span>Masuk sebagai NIM</span>
+        <span class="nim-tag" id="nim-display"></span>
+        <span id="db-status-indicator" class="db-status" style="display:none;">☁️ Tersimpan di Cloud</span>
+        <button type="button" class="btn-logout" onclick="logoutAccount()">Ganti Akun</button>
+    </div>
+
+    <div class="login-section" id="loginSection">
+        <h3>Masuk dengan NIM</h3>
+        <p>Ketik NIM dan password kamu. Kalau NIM ini belum pernah dipakai, akun baru akan otomatis dibuat dengan password yang kamu ketik — jadi cukup ingat NIM &amp; password ini untuk simulasi berikutnya, di device manapun. Data jadwal mata kuliah otomatis dimuat dari database setelah kamu masuk.</p>
+        <div class="login-field">
+            <label for="nimInput">NIM</label>
+            <input type="text" id="nimInput" inputmode="numeric" autocomplete="username" placeholder="cth. 21102001">
         </div>
+        <div class="login-field">
+            <label for="passInput">Password</label>
+            <input type="password" id="passInput" autocomplete="current-password" placeholder="Password kamu">
+        </div>
+        <button class="btn-login" onclick="handleLogin()">Masuk / Daftar</button>
+        <div class="login-note">Catatan keamanan: password disimpan sebagai hash SHA-256 di Supabase, bukan Supabase Auth penuh — jangan pakai password yang sama dengan akun penting lain.</div>
+    </div>
+
+    <div class="info-section" id="emptyCatalogNotice" style="display:none;">
+        <h3 style="color:var(--ink);margin-bottom:10px;font-weight:700;">Katalog mata kuliah belum tersedia</h3>
+        <p style="color:var(--ink-soft);">Belum ada data jadwal di database. Hubungi admin akademik untuk mengisi tabel <code>mata_kuliah</code> terlebih dahulu — mahasiswa tidak bisa mengunggah atau mengubah data jadwal dari halaman ini.</p>
+        <button type="button" class="btn-reset" style="width:auto;margin-top:14px;" onclick="afterLogin(currentNim)">🔄 Coba Muat Ulang</button>
     </div>
 
     <div id="mainContent" class="hidden">
@@ -370,7 +398,9 @@
     let currentTab = 'tab1';
     let fileStatusText = 'Belum ada file dipilih';
     const STORAGE_KEY = 'krs_simulasi_state_v7';
-    const USER_ID_KEY = 'krs_user_id_v1';
+    const NIM_STORAGE_KEY = 'krs_logged_in_nim_v1';
+    const AUTH_TABLE = 'mahasiswa_akun';
+    let currentNim = null;
     // Hosting statis di Wasmer (provider: staticfile) TIDAK punya opsi
     // SPA-fallback/rewrite di app.yaml, jadi path cantik (/schedule/xxx) akan
     // 404 di server sebelum JS sempat jalan. Karena itu link berbagi pakai
@@ -380,25 +410,16 @@
     let dbSaved = false;
 
     // ============================================
-    // USER ID (anonim, disimpan di localStorage supaya
-    // "Simpan Pilihan" / "Muat Pilihan" konsisten per device)
+    // USER ID = NIM mahasiswa yang sedang login.
+    // "Simpan Pilihan" / "Muat Pilihan" dikaitkan ke NIM ini
+    // supaya bisa dibuka lagi dari device manapun dengan NIM+password yang sama.
     // ============================================
     function getUserId() {
-        try {
-            let uid = localStorage.getItem(USER_ID_KEY);
-            if (!uid) {
-                uid = 'u_' + generateShareId(12);
-                localStorage.setItem(USER_ID_KEY, uid);
-            }
-            const hint = document.getElementById('user-id-hint');
-            if (hint) hint.textContent = 'ID kamu: ' + uid + ' (tersimpan di browser ini)';
-            return uid;
-        } catch (e) {
-            return 'anon_' + generateShareId(8);
-        }
+        if (!currentNim) { showToast('⚠️ Silakan masuk dengan NIM dulu.'); throw new Error('Belum login'); }
+        return currentNim;
     }
 
-    // Generator kode acak pendek (dipakai untuk user id & share id)
+    // Generator kode acak pendek (dipakai untuk share id)
     function generateShareId(length = 7) {
         const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; // tanpa 0/O/1/l/I biar gak ambigu
         let result = '';
@@ -408,83 +429,113 @@
         return result;
     }
 
-    // ============================================
-    // SUPABASE FUNCTIONS
-    // ============================================
-    async function syncToSupabase() {
+    // Hash password dengan SHA-256 (Web Crypto). Tidak sekuat bcrypt/Supabase Auth,
+    // tapi cukup untuk mencegah password tersimpan sebagai plain text.
+    async function hashPassword(password) {
+        const enc = new TextEncoder().encode(password);
+        const buf = await crypto.subtle.digest('SHA-256', enc);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Login kalau NIM sudah terdaftar (cocokkan hash password),
+    // atau daftar otomatis kalau NIM ini belum pernah dipakai.
+    async function handleLogin() {
+        const nimInput = document.getElementById('nimInput').value.trim();
+        const passInput = document.getElementById('passInput').value;
+        if (!nimInput || !passInput) { showToast('NIM dan password wajib diisi.'); return; }
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
         try {
-            showToast('☁️ Menyimpan data ke Supabase...');
             document.getElementById('loadingOverlay').style.display = 'flex';
-            
-            const allMk = [];
-            for (let sem of ALL_SEMESTERS) {
-                for (let item of (data[sem] || [])) {
-                    allMk.push({
-                        semester: sem,
-                        no: item.no || '',
-                        kode: item.kode,
-                        kelas: item.kelas,
-                        nama: item.nama,
-                        kategori: item.kategori || 'Wajib',
-                        sks: String(item.sks || 0),
-                        sks_detail: item.sks_detail || '',
-                        dosen: item.dosen || '',
-                        hari: item.hari || 'Tidak tersedia',
-                        jam: item.jam || 'Tidak tersedia',
-                        ruang: item.ruang || 'Tidak tersedia',
-                        data_id: item.data_id || '',
-                    });
+            const hash = await hashPassword(passInput);
+            const { data: existing, error: selErr } = await supabaseClient.from(AUTH_TABLE).select('*').eq('nim', nimInput).maybeSingle();
+            if (selErr) throw selErr;
+
+            if (existing) {
+                if (existing.password_hash !== hash) {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showToast('❌ Password salah untuk NIM ' + nimInput + '.');
+                    return;
                 }
+            } else {
+                const { error: insErr } = await supabaseClient.from(AUTH_TABLE).insert({ nim: nimInput, password_hash: hash });
+                if (insErr) throw insErr;
             }
-            
-            if (allMk.length === 0) {
-                showToast('⚠️ Tidak ada data untuk disimpan.');
-                document.getElementById('loadingOverlay').style.display = 'none';
-                return;
-            }
-            
-            const { error: err } = await supabaseClient.from('mata_kuliah').upsert(allMk);
-            if (err) throw err;
-            
-            dbSaved = true;
-            document.getElementById('db-status-indicator').style.display = 'inline-block';
-            document.getElementById('db-status-indicator').className = 'db-status saved';
-            document.getElementById('db-status-indicator').textContent = '☁️ ' + allMk.length + ' data tersimpan';
-            
+
             document.getElementById('loadingOverlay').style.display = 'none';
-            showToast('✅ ' + allMk.length + ' data berhasil disimpan ke Supabase!');
+            showToast(existing ? ('✅ Berhasil masuk sebagai ' + nimInput) : ('✅ Akun baru dibuat untuk NIM ' + nimInput));
+            await afterLogin(nimInput);
         } catch (err) {
             document.getElementById('loadingOverlay').style.display = 'none';
             console.error(err);
-            showToast('❌ Gagal sync: ' + err.message);
+            showToast('❌ Gagal masuk: ' + err.message);
         }
     }
 
+    // Dipanggil setelah login/registrasi berhasil, atau saat auto-login dari localStorage.
+    async function afterLogin(nim) {
+        currentNim = nim;
+        try { localStorage.setItem(NIM_STORAGE_KEY, nim); } catch (e) {}
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('accountBar').style.display = 'flex';
+        document.getElementById('nim-display').textContent = nim;
+        const hint = document.getElementById('user-id-hint');
+        if (hint) hint.textContent = 'Pilihan disimpan untuk NIM ' + nim;
+
+        let hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
+        if (!hasCatalog) {
+            restoreState();
+            hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
+        }
+        if (!hasCatalog && supabaseConnected) {
+            await loadFromSupabase();
+            hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
+        }
+        if (hasCatalog) {
+            showApp();
+            if (supabaseConnected) await loadPilihanFromSupabase();
+        } else {
+            document.getElementById('emptyCatalogNotice').style.display = '';
+        }
+    }
+
+    function logoutAccount() {
+        currentNim = null;
+        try { localStorage.removeItem(NIM_STORAGE_KEY); } catch (e) {}
+        document.getElementById('accountBar').style.display = 'none';
+        document.getElementById('loginSection').style.display = '';
+        document.getElementById('emptyCatalogNotice').style.display = 'none';
+        document.getElementById('mainContent').classList.add('hidden');
+        document.getElementById('nimInput').value = '';
+        document.getElementById('passInput').value = '';
+        showToast('Berhasil keluar. Masuk lagi dengan NIM & password.');
+    }
+
+    // ============================================
+    // SUPABASE FUNCTIONS
+    // ============================================
     async function loadFromSupabase() {
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
         try {
             showToast('📥 Memuat data dari Supabase...');
             document.getElementById('loadingOverlay').style.display = 'flex';
-            
+
             const { data: mkData, error: err } = await supabaseClient
                 .from('mata_kuliah')
                 .select('*')
                 .order('semester');
-            
+
             if (err) throw err;
-            
+
             if (!mkData || mkData.length === 0) {
-                showToast('⚠️ Belum ada data di Supabase.');
                 document.getElementById('loadingOverlay').style.display = 'none';
                 return;
             }
-            
+
             // Reset data
             data = {1:[],3:[],5:[],7:[],8:[]};
             selected = {1:{},3:{},5:{},7:{},8:{}};
             taken = {};
-            
+
             // Populate data
             for (let item of mkData) {
                 const sem = item.semester;
@@ -504,26 +555,19 @@
                     data_id: item.data_id || '',
                 });
             }
-            
+
             fileStatusText = '📥 Dimuat dari Supabase (' + mkData.length + ' data)';
-            document.getElementById('file-status').textContent = fileStatusText;
             document.getElementById('db-status-indicator').style.display = 'inline-block';
             document.getElementById('db-status-indicator').className = 'db-status synced';
             document.getElementById('db-status-indicator').textContent = '📥 ' + mkData.length + ' data dimuat';
-            
-            showApp();
+
             saveState();
             document.getElementById('loadingOverlay').style.display = 'none';
-            showToast('✅ ' + mkData.length + ' data berhasil dimuat dari Supabase!');
         } catch (err) {
             document.getElementById('loadingOverlay').style.display = 'none';
             console.error(err);
             showToast('❌ Gagal load: ' + err.message);
         }
-    }
-
-    async function saveToSupabase() {
-        await syncToSupabase();
     }
 
     // ============================================
@@ -567,7 +611,7 @@
     async function loadPilihanFromSupabase() {
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
         const hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
-        if (!hasCatalog) { showToast('⚠️ Muat/upload data mata kuliah dulu sebelum memuat pilihan.'); return; }
+        if (!hasCatalog) { showToast('⚠️ Muat data mata kuliah dulu sebelum memuat pilihan.'); return; }
         try {
             showToast('📥 Memuat pilihan tersimpan...');
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -679,7 +723,6 @@
 
             applySharedPayload(row.data || []);
             fileStatusText = '📋 Dimuat dari link berbagi (' + shareId + ')';
-            document.getElementById('file-status').textContent = fileStatusText;
             showApp();
             saveState();
             showToast('✅ Jadwal berhasil dimuat dari link!');
@@ -704,7 +747,6 @@
             if (payload.v !== 2 || !payload.d || !Array.isArray(payload.d)) { showToast('⚠️ Format link tidak valid.'); return; }
             applySharedPayload(payload.d);
             fileStatusText = '📋 Dimuat dari link berbagi (lama)';
-            document.getElementById('file-status').textContent = fileStatusText;
             showApp();
             saveState();
             showToast('✅ Jadwal berhasil dimuat dari link!');
@@ -769,27 +811,13 @@
     function loadState() {
         try { const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return null; return JSON.parse(raw); } catch(e){ storageAvailable=false; return null; }
     }
-    function clearSavedData() {
-        try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
-        data={1:[],3:[],5:[],7:[],8:[]}; selected={1:{},3:{},5:{},7:{},8:{}}; taken={}; currentTab='tab1'; fileStatusText='Belum ada file dipilih';
-        document.getElementById('file-status').textContent=fileStatusText;
-        document.getElementById('mainContent').classList.add('hidden');
-        document.getElementById('uploadSection').style.display='';
-        document.getElementById('jadwal-mingguan').style.display='none';
-        document.getElementById('output-area').textContent='';
-        document.getElementById('share-link-area').style.display='none';
-        document.getElementById('db-status-indicator').style.display='none';
-        updateStorageIndicator('cleared');
-        showToast('Data tersimpan sudah dihapus.');
-    }
     function updateStorageIndicator(state) {
         const m = { saved:['Tersimpan otomatis','var(--ink-faint)','Tersimpan otomatis'], restored:['Dipulihkan','var(--red)','Dipulihkan otomatis'], unavailable:['Penyimpanan tidak tersedia','var(--taken)','Penyimpanan tidak tersedia'], cleared:['Belum ada data','var(--ink-faint)','—'] };
         const [uMsg,color,lMsg]=m[state]||m.cleared;
-        const uEl=document.getElementById('storage-indicator'); if(uEl){uEl.textContent=uMsg;uEl.style.color=color;}
         const lEl=document.getElementById('storage-indicator-live'); if(lEl) lEl.textContent=lMsg;
     }
     function showApp() {
-        document.getElementById('uploadSection').style.display='none';
+        document.getElementById('emptyCatalogNotice').style.display='none';
         document.getElementById('mainContent').classList.remove('hidden');
         renderAll(); updateSummary(); updateJadwalMingguan(); switchTab(currentTab);
     }
@@ -800,83 +828,7 @@
         for(let sem of ALL_SEMESTERS) { if(saved.data[sem]?.length) hasData = true; }
         if(!hasData) { updateStorageIndicator('cleared'); return false; }
         data=saved.data; selected=saved.selected||{}; taken=saved.taken||{}; currentTab=saved.currentTab||'tab1'; fileStatusText=saved.fileStatusText||'Data dipulihkan';
-        document.getElementById('file-status').textContent=fileStatusText; showApp(); updateStorageIndicator('restored'); showToast('Sesi sebelumnya dipulihkan otomatis.'); return true;
-    }
-
-    // ============================================
-    // PARSE CSV
-    // ============================================
-    function parseCSV(text) {
-        const lines=text.split('\n').filter(l=>l.trim()&&l.includes(','));
-        if(lines.length<2) return [];
-        const headerLine=lines[0]; let cur='', inQ=false; const headers=[];
-        for(let i=0;i<headerLine.length;i++){ const c=headerLine[i]; if(c==='"') inQ=!inQ; else if(c===','&&!inQ){ headers.push(cur.trim()); cur=''; } else cur+=c; }
-        if(cur) headers.push(cur.trim());
-        const cleanHeaders=headers.map(h=>h.replace(/^"|"$/g,'').trim());
-        const result=[];
-        for(let i=1;i<lines.length;i++){
-            const line=lines[i]; let curVal='', inQ2=false, vals=[];
-            for(let j=0;j<line.length;j++){ const c=line[j]; if(c==='"') inQ2=!inQ2; else if(c===','&&!inQ2){ vals.push(curVal.trim()); curVal=''; } else curVal+=c; }
-            if(curVal) vals.push(curVal.trim());
-            const cleanVals=vals.map(v=>v.replace(/^"|"$/g,'').trim());
-            const row={}; cleanHeaders.forEach((h,idx)=>{ row[h]=cleanVals[idx]||''; });
-            result.push(row);
-        }
-        return result;
-    }
-
-    function findField(row, fieldNames) {
-        for(let fn of fieldNames) {
-            if(row[fn]!==undefined && row[fn]!=='') return row[fn];
-            const lowerFn=fn.toLowerCase();
-            for(let key of Object.keys(row)) { if(key.toLowerCase()===lowerFn) return row[key]; }
-        }
-        return '';
-    }
-
-    function loadCSV() {
-        const fileInput=document.getElementById('csvFile');
-        const file=fileInput.files[0];
-        if(!file){ showToast('Pilih file CSV terlebih dahulu.'); return; }
-        document.getElementById('file-status').textContent=file.name+' (memproses...)';
-        const reader=new FileReader();
-        reader.onload=function(e){
-            try {
-                const rawData=parseCSV(e.target.result);
-                data={1:[],3:[],5:[],7:[],8:[]};
-                for(let sem of ALL_SEMESTERS) {
-                    const codes = SEMESTER_CODES[sem] || [];
-                    const items = rawData.filter(row=>{
-                        const kode=findField(row,['kode','Kode','kode_makul','KODE']);
-                        return kode && codes.includes(kode);
-                    }).map(row=>{
-                        const kategori=findField(row,['kategori','Kategori','KATEGORI','category'])||'';
-                        const hari=findField(row,['hari','Hari','day'])||'Tidak tersedia';
-                        return {
-                            no: findField(row,['no','No','NO','nomor'])||'',
-                            kode: findField(row,['kode','Kode','kode_makul','KODE'])||'',
-                            kelas: findField(row,['kelas','Kelas','kelas_makul','KELAS'])||'',
-                            nama: findField(row,['nama','Nama','nama_makul','NAMA','nama_matakuliah'])||'',
-                            hari: hari,
-                            jam: findField(row,['jam','Jam','time','waktu'])||'Tidak tersedia',
-                            ruang: findField(row,['ruang','Ruang','room'])||'Tidak tersedia',
-                            dosen: findField(row,['dosen','Dosen','dosen_makul'])||'',
-                            sks: findField(row,['sks','SKS'])||'0',
-                            sks_detail: findField(row,['sks_detail','SKS_Detail','sks_detail'])||'',
-                            kategori: kategori,
-                            data_id: findField(row,['data_id','data-id','dataId'])||'',
-                        };
-                    }).filter(item=>item.kode);
-                    data[sem] = items;
-                }
-                const totalData = ALL_SEMESTERS.reduce((sum, s) => sum + (data[s]||[]).length, 0);
-                fileStatusText=file.name+' — '+totalData+' data';
-                document.getElementById('file-status').textContent=fileStatusText;
-                showToast('File berhasil diproses.');
-                initApp();
-            } catch(err){ console.error(err); showToast('Error: '+err.message); }
-        };
-        reader.readAsText(file);
+        updateStorageIndicator('restored'); return true;
     }
 
     function initApp() {
@@ -1120,9 +1072,14 @@
     // ============================================
     // AUTO-RESTORE & SHARE CHECK
     // ============================================
-    getUserId();
-    restoreState();
-    checkShareOnLoad();
+    (function bootstrapAuth() {
+        let rememberedNim = null;
+        try { rememberedNim = localStorage.getItem(NIM_STORAGE_KEY); } catch (e) {}
+        if (rememberedNim) {
+            afterLogin(rememberedNim);
+        }
+        checkShareOnLoad();
+    })();
 </script>
 </body>
 </html>
