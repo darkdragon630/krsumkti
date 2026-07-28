@@ -323,11 +323,11 @@
     const SUPABASE_URL = 'https://wfxudgybbrsibzfyegcl.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVkZ3liYnJzaWJ6ZnllZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTQ3ODYsImV4cCI6MjEwMDc5MDc4Nn0.zZoM5I0GMJsD0huuWLR-ygCFxbSW2oWa5cqNEtrxvVA';
 
-    let supabase = null;
+    let supabaseClient = null;
     let supabaseConnected = false;
 
     try {
-        supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseClient = supabase_js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         supabaseConnected = true;
         document.getElementById('statusDot').className = 'dot connected';
         document.getElementById('statusText').textContent = '✅ Terhubung ke Supabase';
@@ -400,7 +400,7 @@
                 return;
             }
             
-            const { error: err } = await supabase.from('mata_kuliah').upsert(allMk);
+            const { error: err } = await supabaseClient.from('mata_kuliah').upsert(allMk);
             if (err) throw err;
             
             dbSaved = true;
@@ -423,7 +423,7 @@
             showToast('📥 Memuat data dari Supabase...');
             document.getElementById('loadingOverlay').style.display = 'flex';
             
-            const { data: mkData, error: err } = await supabase
+            const { data: mkData, error: err } = await supabaseClient
                 .from('mata_kuliah')
                 .select('*')
                 .order('semester');
