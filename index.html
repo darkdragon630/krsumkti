@@ -371,7 +371,11 @@
     let fileStatusText = 'Belum ada file dipilih';
     const STORAGE_KEY = 'krs_simulasi_state_v7';
     const USER_ID_KEY = 'krs_user_id_v1';
-    const SHARE_PATH_PREFIX = 'schedule'; // ganti di sini kalau mau path lain, mis. 'krs' -> /krs/{id}
+    // Hosting statis di Wasmer (provider: staticfile) TIDAK punya opsi
+    // SPA-fallback/rewrite di app.yaml, jadi path cantik (/schedule/xxx) akan
+    // 404 di server sebelum JS sempat jalan. Karena itu link berbagi pakai
+    // query param di root ("/?s=xxx") yang selalu aman di static hosting apa pun.
+    const SHARE_QUERY_PARAM = 's';
     let storageAvailable = true;
     let dbSaved = false;
 
@@ -628,7 +632,7 @@
             document.getElementById('loadingOverlay').style.display = 'none';
             if (!shareId) throw (lastErr || new Error('Gagal membuat kode berbagi yang unik.'));
 
-            const shareUrl = window.location.origin + '/' + SHARE_PATH_PREFIX + '/' + shareId;
+            const shareUrl = window.location.origin + window.location.pathname + '?' + SHARE_QUERY_PARAM + '=' + shareId;
             const area = document.getElementById('share-link-area');
             area.style.display = 'block';
             document.getElementById('share-link-url').textContent = shareUrl;
@@ -679,6 +683,9 @@
             showApp();
             saveState();
             showToast('✅ Jadwal berhasil dimuat dari link!');
+            const url = new URL(window.location.href);
+            url.searchParams.delete(SHARE_QUERY_PARAM);
+            window.history.replaceState({}, '', url.toString());
         } catch (err) {
             document.getElementById('loadingOverlay').style.display = 'none';
             console.error(err);
@@ -740,14 +747,13 @@
     }
 
     function checkShareOnLoad() {
-        // Format baru: https://domain/schedule/{share_id}
-        const path = window.location.pathname;
-        const re = new RegExp('/' + SHARE_PATH_PREFIX + '/([A-Za-z0-9_-]+)');
-        const m = path.match(re);
-        if (m) { setTimeout(() => loadFromShareId(m[1]), 300); return; }
+        const url = new URL(window.location.href);
+
+        // Format baru (aman untuk static hosting apa pun): /?s={share_id}
+        const shortId = url.searchParams.get(SHARE_QUERY_PARAM);
+        if (shortId) { setTimeout(() => loadFromShareId(shortId), 300); return; }
 
         // Format lama: ?share=<base64> — tetap didukung untuk link yang sudah terlanjur dibagikan
-        const url = new URL(window.location.href);
         if (url.searchParams.has('share')) {
             setTimeout(loadFromShareLink, 500);
         }
