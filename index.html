@@ -327,7 +327,11 @@
     let supabaseConnected = false;
 
     try {
-        supabaseClient = supabase_js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // FIX: SDK Supabase v2 dari CDN mendaftarkan objek global bernama
+        // `supabase`, bukan `supabase_js`. Sebelumnya kode ini memanggil
+        // `supabase_js.createClient(...)` yang menyebabkan
+        // "supabase_js is not defined".
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         supabaseConnected = true;
         document.getElementById('statusDot').className = 'dot connected';
         document.getElementById('statusText').textContent = '✅ Terhubung ke Supabase';
