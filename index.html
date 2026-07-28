@@ -6,6 +6,8 @@
     <title>Simulasi KRS UMK Teknik Informatika</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js">
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -23,8 +25,12 @@
             --green-tint: #E6F2EC;
             --blue: #1A56DB;
             --blue-tint: #EBF2FE;
+            --purple: #6B21A8;
+            --purple-tint: #F3E8FF;
             --taken: #A6A69F;
             --taken-tint: #ECECE8;
+            --orange: #D48C0C;
+            --orange-tint: #FEF3E4;
             --sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
             --grid-gap: 24px;
@@ -36,16 +42,22 @@
         h1 { text-align: left; color: var(--ink); font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; border-bottom: 4px solid var(--ink); padding-bottom: 20px; margin-bottom: 32px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
         h1::after { content: "SEM. 1 / 3 / 5 / 7 / 8"; font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.05em; color: var(--red); text-transform: none; white-space: nowrap; }
 
+        .supabase-status { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 12px; padding: 6px 14px; border: 1px solid var(--line); background: var(--bg); margin-bottom: 20px; }
+        .supabase-status .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .supabase-status .dot.connected { background: var(--green); }
+        .supabase-status .dot.disconnected { background: var(--red); }
+        .supabase-status .dot.loading { background: var(--orange); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
         .upload-section { background: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 48px 40px; text-align: left; margin-bottom: 32px; position: relative; }
         .upload-section::before { content: "01 — SUMBER DATA"; display: block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--red); margin-bottom: 24px; }
         .upload-section input[type="file"] { padding: 10px 0; font-size: 14px; margin: 4px 0 20px; font-family: var(--mono); border: none; border-bottom: 1px solid var(--line); background: transparent; width: 100%; max-width: 420px; }
-        .btn-upload, .btn-sample { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease, color 0.12s ease; }
+        .btn-upload { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease, color 0.12s ease; }
         .btn-upload:hover { background: var(--red); border-color: var(--red); }
-        .btn-sample { background: transparent; color: var(--ink); margin-left: 12px; }
-        .btn-sample:hover { background: var(--ink); color: var(--surface); }
-
-        .btn-share { background: var(--blue); color: var(--surface); border: 1px solid var(--blue); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; margin-left: 12px; }
-        .btn-share:hover { background: #1A3B8A; border-color: #1A3B8A; }
+        .btn-sync { background: var(--purple); color: var(--surface); border: 1px solid var(--purple); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; margin-left: 12px; }
+        .btn-sync:hover { background: #4A1D7A; border-color: #4A1D7A; }
+        .btn-load { background: var(--blue); color: var(--surface); border: 1px solid var(--blue); border-radius: 0; padding: 12px 28px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.12s ease; margin-left: 12px; }
+        .btn-load:hover { background: #1A3B8A; border-color: #1A3B8A; }
 
         .header-info { background: var(--ink); color: var(--surface); padding: 18px 24px; border-radius: 0; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-family: var(--mono); }
         .header-info .total { font-size: 13px; letter-spacing: 0.02em; padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.25); }
@@ -75,6 +87,7 @@
         .mk-header .mk-left .kategori-badge.pilihan { background: var(--green-tint); color: var(--green); border: 1px solid var(--green); }
         .mk-header .sks-badge-header { background: transparent; color: var(--ink); border: 1px solid var(--ink); padding: 2px 10px; border-radius: 0; font-size: 11px; font-family: var(--mono); }
         .mk-header .taken-badge { background: transparent; color: var(--taken); border: 1px solid var(--taken); padding: 2px 10px; border-radius: 0; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
+        .mk-header .no-schedule-badge { background: transparent; color: var(--orange); border: 1px solid var(--orange); padding: 2px 10px; border-radius: 0; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
         .mk-body { padding: 8px; }
 
         .kelas-item { display: flex; align-items: center; padding: 10px 14px; margin: 4px 0; border-radius: 0; border: 1px solid var(--line); transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease; cursor: pointer; user-select: none; }
@@ -85,6 +98,9 @@
         .kelas-item.selected .sks-badge { border-color: var(--surface); color: var(--surface); }
         .kelas-item.taken { background: var(--taken-tint); border-color: var(--line); opacity: 0.75; cursor: not-allowed; }
         .kelas-item.taken .info .kelas-label::after { content: " — DIAMBIL"; color: var(--taken); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; font-family: var(--mono); }
+        .kelas-item.no-schedule { background: var(--orange-tint); border-color: var(--orange); cursor: default; opacity: 0.7; }
+        .kelas-item.no-schedule .info .kelas-label::after { content: " — BELUM ADA JADWAL"; color: var(--orange); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; font-family: var(--mono); }
+        .kelas-item.no-schedule input[type="checkbox"] { accent-color: var(--orange); cursor: not-allowed; opacity: 0.5; }
         .kelas-item input[type="checkbox"] { margin-right: 14px; accent-color: var(--ink); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
         .kelas-item.taken input[type="checkbox"] { accent-color: var(--taken); cursor: not-allowed; }
         .kelas-item .info { flex: 1; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
@@ -93,6 +109,7 @@
         .kelas-item .info .ruang { color: var(--ink-faint); font-size: 12px; font-family: var(--mono); }
         .kelas-item .info .dosen { color: var(--ink-soft); font-size: 12px; }
         .kelas-item .sks-badge { background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 2px 10px; border-radius: 0; font-size: 11px; font-weight: 600; font-family: var(--mono); flex-shrink: 0; }
+        .kelas-item.no-schedule .sks-badge { border-color: var(--orange); color: var(--orange); }
 
         .summary-card { background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 24px; position: sticky; top: 24px; }
         .summary-card h2 { color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; border-bottom: 1px solid var(--ink); padding-bottom: 12px; }
@@ -101,6 +118,7 @@
         .summary-item .kelas { color: var(--ink); font-weight: 700; }
         .summary-item .kelas.taken { color: var(--taken); }
         .summary-item .kelas.empty { color: var(--ink-faint); font-weight: 400; }
+        .summary-item .kelas.no-schedule { color: var(--orange); font-weight: 400; }
         .summary-item .time { color: var(--ink-soft); }
         .summary-total { margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--ink); font-weight: 700; font-size: 14px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.02em; }
         .summary-conflict { color: var(--red); font-weight: 600; margin-top: 12px; padding: 12px 14px; background: var(--red-tint); border-radius: 0; border: 1px solid var(--red); font-size: 13px; }
@@ -114,13 +132,15 @@
         .sks-rekap .row .value.wajib { color: var(--red); }
         .sks-rekap .row .value.pilihan { color: var(--green); }
 
-        .btn-save, .btn-export-img, .btn-reset, .btn-share-action { border-radius: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; width: 100%; transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease; }
+        .btn-save, .btn-export-img, .btn-reset, .btn-share-action, .btn-save-db { border-radius: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; width: 100%; transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease; }
         .btn-save { background: var(--ink); color: var(--surface); border: 1px solid var(--ink); padding: 13px 20px; margin-top: 18px; }
         .btn-save:hover { background: var(--red); border-color: var(--red); }
         .btn-export-img { background: var(--surface); color: var(--ink); border: 1px solid var(--ink); padding: 12px 20px; margin-top: 10px; }
         .btn-export-img:hover { background: var(--ink); color: var(--surface); }
         .btn-share-action { background: var(--blue); color: var(--surface); border: 1px solid var(--blue); padding: 12px 20px; margin-top: 10px; }
         .btn-share-action:hover { background: #1A3B8A; border-color: #1A3B8A; }
+        .btn-save-db { background: var(--purple); color: var(--surface); border: 1px solid var(--purple); padding: 12px 20px; margin-top: 10px; }
+        .btn-save-db:hover { background: #4A1D7A; border-color: #4A1D7A; }
         .btn-reset { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); padding: 10px 16px; margin-top: 10px; }
         .btn-reset:hover { border-color: var(--ink); color: var(--ink); }
 
@@ -147,6 +167,8 @@
         #jadwal-mingguan .mk-item .kategori-mk { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 1px 8px; border-radius: 0; margin-left: 6px; }
         #jadwal-mingguan .mk-item .kategori-mk.wajib { background: var(--red-tint); color: var(--red); }
         #jadwal-mingguan .mk-item .kategori-mk.pilihan { background: var(--green-tint); color: var(--green); }
+        #jadwal-mingguan .mk-item.no-schedule-item { background: var(--orange-tint); border-left-color: var(--orange); opacity: 0.7; }
+        #jadwal-mingguan .mk-item.no-schedule-item .kode { color: var(--orange); }
         #jadwal-mingguan .mk-item.taken-item { background: var(--taken-tint); border-left-color: var(--taken); }
         #jadwal-mingguan .mk-item.taken-item .kode { color: var(--taken); }
         #jadwal-mingguan .footer { margin-top: 16px; display: flex; justify-content: space-between; font-size: 12px; font-family: var(--mono); color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 12px; flex-wrap: wrap; gap: 8px; }
@@ -160,6 +182,7 @@
         .legend-color.selected { background: var(--ink); border-color: var(--ink); }
         .legend-color.taken { background: var(--taken-tint); border-color: var(--taken); }
         .legend-color.available { background: var(--surface); border-color: var(--line); }
+        .legend-color.no-schedule { background: var(--orange-tint); border-color: var(--orange); }
 
         .hidden { display: none !important; }
 
@@ -170,12 +193,25 @@
         .loading-overlay .spinner p { margin-top: 12px; color: var(--ink); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
 
         .storage-indicator { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-faint); text-transform: uppercase; }
+        .db-status { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 12px; border-radius: 0; }
+        .db-status.saved { background: var(--green-tint); color: var(--green); border: 1px solid var(--green); }
+        .db-status.error { background: var(--red-tint); color: var(--red); border: 1px solid var(--red); }
+        .db-status.synced { background: var(--blue-tint); color: var(--blue); border: 1px solid var(--blue); }
+
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .btn-group .btn-save-db, .btn-group .btn-share-action { flex: 1; min-width: 120px; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="kicker">UMK — Teknik Informatika</div>
     <h1>Simulasi KRS</h1>
+
+    <div class="supabase-status" id="supabaseStatus">
+        <span class="dot loading" id="statusDot"></span>
+        <span id="statusText">Memeriksa koneksi...</span>
+        <span id="dbInfo" style="margin-left:auto;font-size:11px;color:var(--ink-faint);"></span>
+    </div>
 
     <div class="upload-section" id="uploadSection">
         <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--ink-faint);margin-bottom:14px;">FILE .CSV</div>
@@ -184,12 +220,13 @@
         <input type="file" id="csvFile" accept=".csv" style="margin-bottom:15px;">
         <br>
         <button class="btn-upload" onclick="loadCSV()">Upload &amp; Proses</button>
-        <button class="btn-sample" onclick="loadSampleData()">Gunakan Data Sample</button>
-        <button class="btn-share" onclick="loadFromShareLink()">📋 Muat dari Link</button>
+        <button class="btn-sync" onclick="syncToSupabase()">☁️ Simpan ke Supabase</button>
+        <button class="btn-load" onclick="loadFromSupabase()">📥 Muat dari Supabase</button>
         <div style="margin-top:15px;color:var(--ink-soft);font-size:13px;"><span id="file-status">Belum ada file dipilih</span></div>
         <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
             <span id="storage-indicator" class="storage-indicator">Belum ada data tersimpan</span>
-            <button type="button" onclick="clearSavedData()" style="background:transparent;border:1px solid var(--line);color:var(--ink-soft);padding:6px 14px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;">Hapus Data Tersimpan</button>
+            <span id="db-status-indicator" class="db-status" style="display:none;">☁️ Tersimpan di Cloud</span>
+            <button type="button" onclick="clearSavedData()" style="background:transparent;border:1px solid var(--line);color:var(--ink-soft);padding:6px 14px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;">Hapus Data</button>
         </div>
     </div>
 
@@ -206,6 +243,7 @@
             <div class="legend-item"><div class="legend-color available"></div><span>Tersedia (belum dipilih)</span></div>
             <div class="legend-item"><div class="legend-color selected"></div><span>Dipilih</span></div>
             <div class="legend-item"><div class="legend-color taken"></div><span>Sudah Diambil</span></div>
+            <div class="legend-item"><div class="legend-color no-schedule"></div><span>Belum Ada Jadwal</span></div>
         </div>
 
         <div class="tab-section">
@@ -233,9 +271,12 @@
                     <h2>03 — Ringkasan Pilihan</h2>
                     <div id="summary-list"></div>
                     <div id="sks-rekap-container"></div>
-                    <button class="btn-save" onclick="saveSelection()">Simpan Pilihan (JSON)</button>
-                    <button class="btn-export-img" onclick="exportImage()">Export Jadwal Mingguan (JPG)</button>
-                    <button class="btn-share-action" onclick="generateShareLink()">🔗 Bagikan Jadwal (Link)</button>
+                    <div class="btn-group">
+                        <button class="btn-save-db" onclick="saveToSupabase()">☁️ Simpan ke Cloud</button>
+                        <button class="btn-share-action" onclick="generateShareLink()">🔗 Bagikan</button>
+                    </div>
+                    <button class="btn-save" onclick="saveSelection()">💾 Simpan Pilihan (JSON)</button>
+                    <button class="btn-export-img" onclick="exportImage()">🖼️ Export JPG</button>
                     <div id="share-link-area">
                         <div class="link-label">🔗 Link Berbagi</div>
                         <div class="link-url" id="share-link-url"></div>
@@ -271,27 +312,36 @@
 </div>
 
 <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"><div class="spin"></div><p>Sedang memproses gambar...</p></div>
+    <div class="spinner"><div class="spin"></div><p>Sedang memproses...</p></div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
     // ============================================
-    // SEMESTER MAPPING - SEMUA SEMESTER
+    // SUPABASE CONFIG - SUDAH PAKAI PUNYA ANDA
     // ============================================
-    const SEMESTER_MAP = {
-        // Semester 1
-        'IFE101':1,'IFE103':1,'IFE105':1,'IFE107':1,'IFE109':1,'IFE111':1,'IFE113':1,'IFE115':1,
-        // Semester 3
-        'IFE201':3,'IFE203':3,'IFE205':3,'IFE207':3,'IFE209':3,'IFE211':3,'IFE213':3,'IFE215':3,'MKW201':3,
-        // Semester 5
-        'IFE301':5,'IFE303':5,'IFE305':5,'IFE307':5,'IFE309':5,'IFE311':5,'IFE313':5,
-        'MKW301':5,'OAI301':5,'OAI303':5,'OAI305':5,'OSE301':5,
-        // Semester 7
-        'FTI401':7,'FTI403':7,'IFT711':7,'OAI401':7,'ONE401':7,'ONE403':7,'OSE403':7,'UMK401':7,
-        // Semester 8
-        'IFE404':8,'IFT802':8,
-    };
+    const SUPABASE_URL = 'https://wfxudgybbrsibzfyegcl.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVkZ3liYnJzaWJ6ZnllZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTQ3ODYsImV4cCI6MjEwMDc5MDc4Nn0.zZoM5I0GMJsD0huuWLR-ygCFxbSW2oWa5cqNEtrxvVA';
+
+    let supabase = null;
+    let supabaseConnected = false;
+
+    try {
+        supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseConnected = true;
+        document.getElementById('statusDot').className = 'dot connected';
+        document.getElementById('statusText').textContent = '✅ Terhubung ke Supabase';
+        document.getElementById('dbInfo').textContent = '📊 wfxudgybbrsibzfyegcl';
+    } catch (e) {
+        supabaseConnected = false;
+        document.getElementById('statusDot').className = 'dot disconnected';
+        document.getElementById('statusText').textContent = '❌ Gagal koneksi Supabase';
+        console.warn('Supabase not available:', e.message);
+    }
+
+    // ============================================
+    // SEMESTER MAPPING
+    // ============================================
     const SEMESTER_CODES = {
         1: ['IFE101','IFE103','IFE105','IFE107','IFE109','IFE111','IFE113','IFE115'],
         3: ['IFE201','IFE203','IFE205','IFE207','IFE209','IFE211','IFE213','IFE215','MKW201'],
@@ -299,39 +349,8 @@
         7: ['FTI401','FTI403','IFT711','OAI401','ONE401','ONE403','OSE403','UMK401'],
         8: ['IFE404','IFT802'],
     };
-    const SEMESTER_LABELS = {1:'Semester 1',3:'Semester 3',5:'Semester 5',7:'Semester 7',8:'Semester 8'};
-    const TAB_IDS = {1:'tab1',3:'tab3',5:'tab5',7:'tab7',8:'tab8'};
-    const LIST_IDS = {1:'mk-list-1',3:'mk-list-3',5:'mk-list-5',7:'mk-list-7',8:'mk-list-8'};
     const ALL_SEMESTERS = [1,3,5,7,8];
-
-    function detectSemester(k) { return SEMESTER_MAP[k] || null; }
-
-    // ============================================
-    // SAMPLE DATA
-    // ============================================
-    const SAMPLE_DATA = {
-        1: [
-            {"kode":"IFE101","kelas":"A","nama":"Bahasa Inggris","hari":"Senin","jam":"10:30 - 12:09","ruang":"J.4.10","dosen":"Dr. AISYAH RIRIN PERWIKASIH UTARI, S.S., M.Pd","sks":2,"kategori":"Wajib"},
-            {"kode":"IFE103","kelas":"B","nama":"Pengantar Teknik Informatika","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.4.10","dosen":"RIZKYSARI MEIMAHARANI, S.Kom, M.Kom","sks":2,"kategori":"Wajib"},
-        ],
-        3: [
-            {"kode":"IFE201","kelas":"D","nama":"Statistik dan Probabilitas","hari":"Selasa","jam":"08:00 - 10:29","ruang":"J.4.10","dosen":"ESTI WIJAYANTI, M.Kom","sks":3,"kategori":"Wajib"},
-            {"kode":"IFE203","kelas":"A","nama":"Rekayasa Perangkat Lunak","hari":"Rabu","jam":"13:00 - 15:29","ruang":"J.4.10","dosen":"RATIH NINDYASARI, S.Kom., .Kom.","sks":3,"kategori":"Wajib"},
-        ],
-        5: [
-            {"kode":"IFE301","kelas":"E","nama":"Keamanan Data dan Informasi","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.4.10","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":3,"kategori":"Wajib"},
-            {"kode":"IFE303","kelas":"C","nama":"Analisis dan Desain Perangkat Lunak","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.3.03","dosen":"TRI LISTYORINI, M.Kom","sks":3,"kategori":"Wajib"},
-            {"kode":"OAI305","kelas":"A","nama":"Sistem Pendukung Keputusan","hari":"Senin","jam":"12:10 - 14:39","ruang":"J.3.11","dosen":"ALDHI ARI KURNIAWAN, M.Kom.","sks":3,"kategori":"Pilihan"},
-        ],
-        7: [
-            {"kode":"FTI401","kelas":"A","nama":"Technopreneurship","hari":"Senin","jam":"11:20 - 12:59","ruang":"J.4.06","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":2,"kategori":"Wajib"},
-            {"kode":"FTI403","kelas":"A","nama":"Etika Profesi Teknik","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.4.04","dosen":"EVANITA, S.Kom, M.Kom","sks":2,"kategori":"Wajib"},
-        ],
-        8: [
-            {"kode":"IFE404","kelas":"A","nama":"Pengembangan Diri dan Bimbingan Karir","hari":"Kamis","jam":"08:00 - 10:29","ruang":"J.4.11","dosen":"Dr. ANASTASYA LATUBESSY, S.Kom, M.Cs","sks":2,"kategori":"Wajib"},
-            {"kode":"IFT802","kelas":"X","nama":"SKRIPSI","hari":"Jumat","jam":"08:00 - 10:29","ruang":"-","dosen":"","sks":6,"kategori":"Wajib"},
-        ]
-    };
+    const LIST_IDS = {1:'mk-list-1',3:'mk-list-3',5:'mk-list-5',7:'mk-list-7',8:'mk-list-8'};
 
     // ============================================
     // STATE
@@ -341,8 +360,127 @@
     let taken = {};
     let currentTab = 'tab1';
     let fileStatusText = 'Belum ada file dipilih';
-    const STORAGE_KEY = 'krs_simulasi_state_v3';
+    const STORAGE_KEY = 'krs_simulasi_state_v7';
     let storageAvailable = true;
+    let dbSaved = false;
+
+    // ============================================
+    // SUPABASE FUNCTIONS
+    // ============================================
+    async function syncToSupabase() {
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
+        try {
+            showToast('☁️ Menyimpan data ke Supabase...');
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            const allMk = [];
+            for (let sem of ALL_SEMESTERS) {
+                for (let item of (data[sem] || [])) {
+                    allMk.push({
+                        semester: sem,
+                        no: item.no || '',
+                        kode: item.kode,
+                        kelas: item.kelas,
+                        nama: item.nama,
+                        kategori: item.kategori || 'Wajib',
+                        sks: String(item.sks || 0),
+                        sks_detail: item.sks_detail || '',
+                        dosen: item.dosen || '',
+                        hari: item.hari || 'Tidak tersedia',
+                        jam: item.jam || 'Tidak tersedia',
+                        ruang: item.ruang || 'Tidak tersedia',
+                        data_id: item.data_id || '',
+                    });
+                }
+            }
+            
+            if (allMk.length === 0) {
+                showToast('⚠️ Tidak ada data untuk disimpan.');
+                document.getElementById('loadingOverlay').style.display = 'none';
+                return;
+            }
+            
+            const { error: err } = await supabase.from('mata_kuliah').upsert(allMk);
+            if (err) throw err;
+            
+            dbSaved = true;
+            document.getElementById('db-status-indicator').style.display = 'inline-block';
+            document.getElementById('db-status-indicator').className = 'db-status saved';
+            document.getElementById('db-status-indicator').textContent = '☁️ ' + allMk.length + ' data tersimpan';
+            
+            document.getElementById('loadingOverlay').style.display = 'none';
+            showToast('✅ ' + allMk.length + ' data berhasil disimpan ke Supabase!');
+        } catch (err) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            console.error(err);
+            showToast('❌ Gagal sync: ' + err.message);
+        }
+    }
+
+    async function loadFromSupabase() {
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
+        try {
+            showToast('📥 Memuat data dari Supabase...');
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            const { data: mkData, error: err } = await supabase
+                .from('mata_kuliah')
+                .select('*')
+                .order('semester');
+            
+            if (err) throw err;
+            
+            if (!mkData || mkData.length === 0) {
+                showToast('⚠️ Belum ada data di Supabase.');
+                document.getElementById('loadingOverlay').style.display = 'none';
+                return;
+            }
+            
+            // Reset data
+            data = {1:[],3:[],5:[],7:[],8:[]};
+            selected = {1:{},3:{},5:{},7:{},8:{}};
+            taken = {};
+            
+            // Populate data
+            for (let item of mkData) {
+                const sem = item.semester;
+                if (!data[sem]) data[sem] = [];
+                data[sem].push({
+                    no: item.no || '',
+                    kode: item.kode,
+                    kelas: item.kelas,
+                    nama: item.nama,
+                    hari: item.hari || 'Tidak tersedia',
+                    jam: item.jam || 'Tidak tersedia',
+                    ruang: item.ruang || 'Tidak tersedia',
+                    dosen: item.dosen || '',
+                    sks: item.sks || '0',
+                    sks_detail: item.sks_detail || '',
+                    kategori: item.kategori || 'Wajib',
+                    data_id: item.data_id || '',
+                });
+            }
+            
+            fileStatusText = '📥 Dimuat dari Supabase (' + mkData.length + ' data)';
+            document.getElementById('file-status').textContent = fileStatusText;
+            document.getElementById('db-status-indicator').style.display = 'inline-block';
+            document.getElementById('db-status-indicator').className = 'db-status synced';
+            document.getElementById('db-status-indicator').textContent = '📥 ' + mkData.length + ' data dimuat';
+            
+            showApp();
+            saveState();
+            document.getElementById('loadingOverlay').style.display = 'none';
+            showToast('✅ ' + mkData.length + ' data berhasil dimuat dari Supabase!');
+        } catch (err) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            console.error(err);
+            showToast('❌ Gagal load: ' + err.message);
+        }
+    }
+
+    async function saveToSupabase() {
+        await syncToSupabase();
+    }
 
     // ============================================
     // SHARE LINK FUNCTIONS
@@ -350,38 +488,27 @@
     function generateShareLink() {
         const items = getSelectedItems().filter(item => item.status === 'selected');
         if (items.length === 0) { showToast('Belum ada pilihan kelas untuk dibagikan.'); return; }
-        
-        // Buat payload kompak
-        const payload = {
-            v: 2,
-            d: items.map(item => ({
-                k: item.kode,
-                kl: item.kelas,
-                n: item.nama,
-                h: item.hari,
-                j: item.jam,
-                r: item.ruang,
-                ds: item.dosen || '',
-                s: item.sks,
-                kat: item.kategori || 'Wajib',
-                sem: item.semester
-            }))
-        };
-        
-        const json = JSON.stringify(payload);
-        // Kompres dengan encodeURIComponent
-        const encoded = encodeURIComponent(json);
-        // Buat link
+        const payload = { v: 2, d: items.map(item => ({ 
+            k: item.kode, 
+            kl: item.kelas, 
+            n: item.nama, 
+            h: item.hari, 
+            j: item.jam, 
+            r: item.ruang, 
+            ds: item.dosen || '', 
+            s: item.sks, 
+            sk: item.sks_detail || '',
+            kat: item.kategori || 'Wajib', 
+            sem: item.semester,
+            no: item.no || ''
+        })) };
+        const encoded = encodeURIComponent(JSON.stringify(payload));
         const url = new URL(window.location.href);
         url.searchParams.set('share', encoded);
         const shareUrl = url.toString();
-        
-        // Tampilkan
         const area = document.getElementById('share-link-area');
         area.style.display = 'block';
         document.getElementById('share-link-url').textContent = shareUrl;
-        
-        // Scroll ke area
         area.scrollIntoView({ behavior: 'smooth', block: 'center' });
         showToast('🔗 Link berbagi berhasil dibuat!');
     }
@@ -391,7 +518,6 @@
         navigator.clipboard.writeText(url).then(() => {
             showToast('📋 Link berhasil disalin!');
         }).catch(() => {
-            // Fallback
             const range = document.createRange();
             const sel = window.getSelection();
             const el = document.getElementById('share-link-url');
@@ -406,31 +532,20 @@
     function loadFromShareLink() {
         const url = new URL(window.location.href);
         const shareParam = url.searchParams.get('share');
-        if (!shareParam) {
-            showToast('⚠️ Tidak ada link yang valid.');
-            return;
-        }
-        
+        if (!shareParam) { showToast('⚠️ Tidak ada link yang valid.'); return; }
         try {
             const decoded = decodeURIComponent(shareParam);
             const payload = JSON.parse(decoded);
-            
-            if (payload.v !== 2 || !payload.d || !Array.isArray(payload.d)) {
-                showToast('⚠️ Format link tidak valid.');
-                return;
-            }
-            
-            // Reset data
+            if (payload.v !== 2 || !payload.d || !Array.isArray(payload.d)) { showToast('⚠️ Format link tidak valid.'); return; }
             data = {1:[],3:[],5:[],7:[],8:[]};
             selected = {1:{},3:{},5:{},7:{},8:{}};
             taken = {};
-            
-            // Konversi ke format data
             const semMap = {};
             payload.d.forEach(item => {
                 const sem = item.sem || 5;
                 if (!semMap[sem]) semMap[sem] = [];
                 semMap[sem].push({
+                    no: item.no || '',
                     kode: item.k,
                     kelas: item.kl,
                     nama: item.n,
@@ -438,38 +553,29 @@
                     jam: item.j,
                     ruang: item.r,
                     dosen: item.ds || '',
-                    sks: item.s || 0,
-                    kategori: item.kat || 'Wajib'
+                    sks: item.s || '0',
+                    sks_detail: item.sk || '',
+                    kategori: item.kat || 'Wajib',
                 });
-                // Auto-select
                 if (!selected[sem]) selected[sem] = {};
                 selected[sem][item.k] = item.kl;
             });
-            
-            // Isi data
             for (let sem of ALL_SEMESTERS) {
-                if (semMap[sem]) {
-                    data[sem] = semMap[sem];
-                }
+                if (semMap[sem]) { data[sem] = semMap[sem]; }
             }
-            
             fileStatusText = '📋 Dimuat dari link berbagi';
             document.getElementById('file-status').textContent = fileStatusText;
             showApp();
             saveState();
             showToast('✅ Jadwal berhasil dimuat dari link!');
-            
-            // Hapus parameter dari URL agar tidak mengganggu
             url.searchParams.delete('share');
             window.history.replaceState({}, '', url.toString());
-            
         } catch (err) {
             console.error(err);
             showToast('❌ Gagal memuat link: ' + err.message);
         }
     }
 
-    // Cek link saat load
     function checkShareOnLoad() {
         const url = new URL(window.location.href);
         if (url.searchParams.has('share')) {
@@ -496,6 +602,7 @@
         document.getElementById('jadwal-mingguan').style.display='none';
         document.getElementById('output-area').textContent='';
         document.getElementById('share-link-area').style.display='none';
+        document.getElementById('db-status-indicator').style.display='none';
         updateStorageIndicator('cleared');
         showToast('Data tersimpan sudah dihapus.');
     }
@@ -568,18 +675,22 @@
                         return kode && codes.includes(kode);
                     }).map(row=>{
                         const kategori=findField(row,['kategori','Kategori','KATEGORI','category'])||'';
+                        const hari=findField(row,['hari','Hari','day'])||'Tidak tersedia';
                         return {
+                            no: findField(row,['no','No','NO','nomor'])||'',
                             kode: findField(row,['kode','Kode','kode_makul','KODE'])||'',
                             kelas: findField(row,['kelas','Kelas','kelas_makul','KELAS'])||'',
                             nama: findField(row,['nama','Nama','nama_makul','NAMA','nama_matakuliah'])||'',
-                            hari: findField(row,['hari','Hari','day'])||'Tidak tersedia',
+                            hari: hari,
                             jam: findField(row,['jam','Jam','time','waktu'])||'Tidak tersedia',
                             ruang: findField(row,['ruang','Ruang','room'])||'Tidak tersedia',
                             dosen: findField(row,['dosen','Dosen','dosen_makul'])||'',
-                            sks: parseInt(findField(row,['sks','SKS']))||0,
-                            kategori: kategori
+                            sks: findField(row,['sks','SKS'])||'0',
+                            sks_detail: findField(row,['sks_detail','SKS_Detail','sks_detail'])||'',
+                            kategori: kategori,
+                            data_id: findField(row,['data_id','data-id','dataId'])||'',
                         };
-                    }).filter(item=>item.kode && item.hari!=='Tidak tersedia' && item.hari);
+                    }).filter(item=>item.kode);
                     data[sem] = items;
                 }
                 const totalData = ALL_SEMESTERS.reduce((sum, s) => sum + (data[s]||[]).length, 0);
@@ -592,14 +703,6 @@
         reader.readAsText(file);
     }
 
-    function loadSampleData() {
-        data = JSON.parse(JSON.stringify(SAMPLE_DATA));
-        fileStatusText='Menggunakan data sample';
-        document.getElementById('file-status').textContent=fileStatusText;
-        showToast('Data sample dimuat.');
-        initApp();
-    }
-
     function initApp() {
         selected={1:{},3:{},5:{},7:{},8:{}}; taken={}; currentTab='tab1';
         showApp(); saveState();
@@ -609,10 +712,20 @@
     // RENDER
     // ============================================
     function parseTime(t){ const m=t.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/); return m?{start:parseInt(m[1])*100+parseInt(m[2]), end:parseInt(m[3])*100+parseInt(m[4])}:null; }
-    function checkConflicts(items){ const conflicts=[], byDay={}; items.forEach(item=>{ if(!byDay[item.hari]) byDay[item.hari]=[]; byDay[item.hari].push(item); }); Object.keys(byDay).forEach(day=>{ const items2=byDay[day]; for(let i=0;i<items2.length;i++){ for(let j=i+1;j<items2.length;j++){ const t1=parseTime(items2[i].jam), t2=parseTime(items2[j].jam); if(t1&&t2&&!(t1.end<=t2.start||t2.end<=t1.start)) conflicts.push({hari:day,mk1:items2[i].kode+'-'+items2[i].kelas,jam1:items2[i].jam,mk2:items2[j].kode+'-'+items2[j].kelas,jam2:items2[j].jam}); } } }); return conflicts; }
+    function checkConflicts(items){ 
+        const conflicts=[], byDay={}; 
+        items.filter(item=>item.hari!=='Tidak tersedia').forEach(item=>{ 
+            if(!byDay[item.hari]) byDay[item.hari]=[]; 
+            byDay[item.hari].push(item); 
+        }); 
+        Object.keys(byDay).forEach(day=>{ const items2=byDay[day]; for(let i=0;i<items2.length;i++){ for(let j=i+1;j<items2.length;j++){ const t1=parseTime(items2[i].jam), t2=parseTime(items2[j].jam); if(t1&&t2&&!(t1.end<=t2.start||t2.end<=t1.start)) conflicts.push({hari:day,mk1:items2[i].kode+'-'+items2[i].kelas,jam1:items2[i].jam,mk2:items2[j].kode+'-'+items2[j].kelas,jam2:items2[j].jam}); } } }); 
+        return conflicts; 
+    }
 
     function toggleKelas(semester,kode,kelas){
         const sem = parseInt(semester);
+        const item = data[sem]?.find(i => i.kode === kode && i.kelas === kelas);
+        if(item && item.hari === 'Tidak tersedia') { showToast('⚠️ Mata kuliah ini belum memiliki jadwal.'); return; }
         if(taken[kode]){ showToast('Mata kuliah ini sudah diambil.'); return; }
         if(selected[sem][kode]===kelas) selected[sem][kode]=null;
         else selected[sem][kode]=kelas;
@@ -624,19 +737,47 @@
         const sem=parseInt(semester);
         const items=data[sem]||[];
         const semSelected=selected[sem]||{};
-        const groups={}; items.forEach(item=>{ if(!groups[item.kode]) groups[item.kode]=[]; groups[item.kode].push(item); });
+        const groups={}; 
+        items.forEach(item=>{ 
+            if(!groups[item.kode]) groups[item.kode]=[]; 
+            groups[item.kode].push(item); 
+        });
         let html='';
         const groupKeys=Object.keys(groups);
         if(groupKeys.length===0) html='<p style="color:#718096;text-align:center;padding:20px;">Tidak ada data untuk semester ini.</p>';
         groupKeys.forEach(kode=>{
-            const group=groups[kode]; const name=group[0].nama; const sks=group[0].sks; const isTaken=taken[kode]||false; const kategori=group[0].kategori||'';
+            const group=groups[kode]; 
+            const name=group[0].nama; 
+            const sks=group[0].sks; 
+            const isTaken=taken[kode]||false; 
+            const kategori=group[0].kategori||'';
+            const allNoSchedule = group.every(item => item.hari === 'Tidak tersedia');
+            
             const katClass=kategori.toLowerCase()==='pilihan'?'pilihan':'wajib';
-            html+=`<div class="mk-group"><div class="mk-header"><div class="mk-left"><span>${kode} — ${name}</span><span class="kategori-badge ${katClass}">${kategori||'Wajib'}</span></div><span>${isTaken?`<span class="taken-badge">Sudah Diambil</span>`:`<span class="sks-badge-header">${sks} SKS</span>`}</span></div><div class="mk-body">`;
+            html+=`<div class="mk-group"><div class="mk-header"><div class="mk-left"><span>${kode} — ${name}</span><span class="kategori-badge ${katClass}">${kategori||'Wajib'}</span></div><span>`;
+            if(isTaken) html+=`<span class="taken-badge">Sudah Diambil</span>`;
+            else if(allNoSchedule) html+=`<span class="no-schedule-badge">⏳ Belum Ada Jadwal</span>`;
+            else html+=`<span class="sks-badge-header">${sks} SKS</span>`;
+            html+=`</span></div><div class="mk-body">`;
+            
             group.forEach(item=>{
-                const isSelected=semSelected[kode]===item.kelas&&!isTaken;
-                html+=`<div class="kelas-item ${isSelected?'selected':''} ${isTaken?'taken':''}" onclick="toggleKelas('${sem}','${kode}','${item.kelas}')">
-                    <input type="checkbox" ${isSelected?'checked':''} ${isTaken?'disabled':''} onclick="event.stopPropagation(); toggleKelas('${sem}','${kode}','${item.kelas}')">
-                    <div class="info"><span class="kelas-label">${item.kelas}</span><span class="time">${item.hari} ${item.jam}</span><span class="ruang">${item.ruang}</span><span class="dosen">${item.dosen}</span></div>
+                const isSelected = semSelected[kode]===item.kelas && !isTaken;
+                const isNoSchedule = item.hari === 'Tidak tersedia';
+                const isDisabled = isTaken || isNoSchedule;
+                
+                let classes = 'kelas-item';
+                if(isSelected) classes += ' selected';
+                if(isTaken) classes += ' taken';
+                if(isNoSchedule) classes += ' no-schedule';
+                
+                html+=`<div class="${classes}" onclick="${!isDisabled ? `toggleKelas('${sem}','${kode}','${item.kelas}')` : ''}">
+                    <input type="checkbox" ${isSelected?'checked':''} ${isDisabled?'disabled':''} onclick="event.stopPropagation(); ${!isDisabled ? `toggleKelas('${sem}','${kode}','${item.kelas}')` : ''}">
+                    <div class="info">
+                        <span class="kelas-label">${item.kelas}</span>
+                        <span class="time">${item.hari} ${item.jam}</span>
+                        <span class="ruang">${item.ruang}</span>
+                        <span class="dosen">${item.dosen}</span>
+                    </div>
                     <span class="sks-badge">${item.sks} SKS</span>
                 </div>`;
             });
@@ -677,7 +818,7 @@
         const selectedItems=getSelectedItems();
         let totalSKS=0, takenCount=0, selectedCount=0, wajibSKS=0, pilihanSKS=0;
         selectedItems.forEach(item=>{
-            const s=parseInt(item.sks); totalSKS+=s;
+            const s=parseInt(item.sks)||0; totalSKS+=s;
             if(item.status==='taken') takenCount++;
             else selectedCount++;
             if(item.kategori && item.kategori.toLowerCase()==='pilihan') pilihanSKS+=s;
@@ -700,7 +841,8 @@
                     html+=`<div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px;">Semester ${sem}</div>`;
                     semItems.forEach(item=>{
                         const label=item.status==='taken'?'✓':item.kelas;
-                        html+=`<div class="summary-item"><span class="mk">${item.kode}</span><span class="kelas ${item.status==='taken'?'taken':''}">${label}</span><span class="time">${item.hari} ${item.jam}</span></div>`;
+                        const cls = item.hari === 'Tidak tersedia' ? 'no-schedule' : (item.status==='taken'?'taken':'');
+                        html+=`<div class="summary-item"><span class="mk">${item.kode}</span><span class="kelas ${cls}">${label}</span><span class="time">${item.hari} ${item.jam}</span></div>`;
                     });
                 }
             }
@@ -711,7 +853,7 @@
         let rekapHtml=`<div class="sks-rekap"><div class="row"><span class="label">Wajib</span><span class="value wajib">${wajibSKS} SKS</span></div><div class="row"><span class="label">Pilihan</span><span class="value pilihan">${pilihanSKS} SKS</span></div><div class="row" style="border-top:1px solid var(--line);padding-top:4px;margin-top:4px;"><span class="label">Total</span><span class="value">${totalSKS} SKS</span></div></div>`;
         rekapDiv.innerHTML=rekapHtml;
 
-        const selectedOnly=selectedItems.filter(item=>item.status!=='taken');
+        const selectedOnly=selectedItems.filter(item=>item.status!=='taken' && item.hari!=='Tidak tersedia');
         const conflicts=checkConflicts(selectedOnly);
         const statusDiv=document.getElementById('status-display');
         if(conflicts.length>0){ statusDiv.innerHTML=conflicts.length+' bentrok ditemukan'; statusDiv.style.color='#e53e3e';
@@ -725,12 +867,12 @@
     // JADWAL MINGGUAN
     // ============================================
     function updateJadwalMingguan(){
-        const selectedItems=getSelectedItems().filter(item=>item.status==='selected');
+        const selectedItems=getSelectedItems().filter(item=>item.status==='selected' && item.hari!=='Tidak tersedia');
         const days=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
         const dayMap={}; days.forEach(d=>dayMap[d]=[]);
         selectedItems.forEach(item=>{ if(item.hari&&dayMap[item.hari]) dayMap[item.hari].push(item); });
         days.forEach(d=>{ dayMap[d].sort((a,b)=>{ const t1=parseTime(a.jam), t2=parseTime(b.jam); return(t1?t1.start:0)-(t2?t2.start:0); }); });
-        let totalSKS=selectedItems.reduce((s,i)=>s+parseInt(i.sks),0);
+        let totalSKS=selectedItems.reduce((s,i)=>s+parseInt(i.sks||0),0);
         document.getElementById('footer-sks').textContent=totalSKS;
         document.getElementById('footer-info').textContent=selectedItems.length+' mata kuliah dipilih';
         days.forEach(day=>{
@@ -747,8 +889,8 @@
     }
 
     function exportImage(){
-        const selectedItems=getSelectedItems().filter(item=>item.status==='selected');
-        if(selectedItems.length===0){ showToast('Belum ada pilihan kelas.'); return; }
+        const selectedItems=getSelectedItems().filter(item=>item.status==='selected' && item.hari!=='Tidak tersedia');
+        if(selectedItems.length===0){ showToast('Belum ada pilihan kelas yang memiliki jadwal.'); return; }
         document.getElementById('jadwal-mingguan').style.display='block';
         updateJadwalMingguan();
         const overlay=document.getElementById('loadingOverlay');
@@ -778,14 +920,15 @@
                 result+=`\nSEMESTER ${sem}:\n`;
                 semItems.forEach(item=>{
                     const label=item.status==='taken'?'SUDAH DIAMBIL':item.kelas;
-                    result+=`  ${item.kode}-${label} | ${item.nama} | ${item.hari} ${item.jam} | ${item.ruang} | ${item.dosen||'-'} | ${item.kategori||'Wajib'}\n`;
+                    const statusJadwal = item.hari==='Tidak tersedia' ? ' [BELUM ADA JADWAL]' : '';
+                    result+=`  ${item.kode}-${label}${statusJadwal} | ${item.nama} | ${item.hari} ${item.jam} | ${item.ruang} | ${item.dosen||'-'} | ${item.kategori||'Wajib'} | SKS: ${item.sks}\n`;
                 });
             }
         }
         result+='='.repeat(50)+'\n';
-        const totalSKS=items.reduce((s,i)=>s+parseInt(i.sks),0);
+        const totalSKS=items.reduce((s,i)=>s+parseInt(i.sks||0),0);
         result+=`Total SKS: ${totalSKS}\n`;
-        const conflicts=checkConflicts(items.filter(item=>item.status!=='taken'));
+        const conflicts=checkConflicts(items.filter(item=>item.status!=='taken' && item.hari!=='Tidak tersedia'));
         if(conflicts.length>0){ result+='\nBENTROK DITEMUKAN:\n'; conflicts.forEach(c=>result+=`  - ${c.hari}: ${c.mk1} (${c.jam1}) bentrok dengan ${c.mk2} (${c.jam2})\n`); } else result+='\nTIDAK ADA BENTROK';
         output.textContent=result;
         const jsonData={timestamp:new Date().toISOString(), selected:items, total_sks:totalSKS, conflicts:conflicts};
