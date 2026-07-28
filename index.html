@@ -141,6 +141,8 @@
         .btn-share-action:hover { background: #1A3B8A; border-color: #1A3B8A; }
         .btn-save-db { background: var(--purple); color: var(--surface); border: 1px solid var(--purple); padding: 12px 20px; margin-top: 10px; }
         .btn-save-db:hover { background: #4A1D7A; border-color: #4A1D7A; }
+        .btn-load-pilihan { background: var(--green); color: var(--surface); border: 1px solid var(--green); padding: 12px 20px; margin-top: 10px; }
+        .btn-load-pilihan:hover { background: #1E5A38; border-color: #1E5A38; }
         .btn-reset { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); padding: 10px 16px; margin-top: 10px; }
         .btn-reset:hover { border-color: var(--ink); color: var(--ink); }
 
@@ -199,7 +201,8 @@
         .db-status.synced { background: var(--blue-tint); color: var(--blue); border: 1px solid var(--blue); }
 
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .btn-group .btn-save-db, .btn-group .btn-share-action { flex: 1; min-width: 120px; }
+        .btn-group .btn-save-db, .btn-group .btn-share-action, .btn-group .btn-load-pilihan { flex: 1; min-width: 120px; }
+        .user-id-hint { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); margin-top: 6px; letter-spacing: 0.03em; }
     </style>
 </head>
 <body>
@@ -272,9 +275,11 @@
                     <div id="summary-list"></div>
                     <div id="sks-rekap-container"></div>
                     <div class="btn-group">
-                        <button class="btn-save-db" onclick="saveToSupabase()">☁️ Simpan ke Cloud</button>
+                        <button class="btn-save-db" onclick="savePilihanToSupabase()">☁️ Simpan Pilihan</button>
+                        <button class="btn-load-pilihan" onclick="loadPilihanFromSupabase()">📥 Muat Pilihan</button>
                         <button class="btn-share-action" onclick="generateShareLink()">🔗 Bagikan</button>
                     </div>
+                    <div class="user-id-hint" id="user-id-hint"></div>
                     <button class="btn-save" onclick="saveSelection()">💾 Simpan Pilihan (JSON)</button>
                     <button class="btn-export-img" onclick="exportImage()">🖼️ Export JPG</button>
                     <div id="share-link-area">
@@ -365,8 +370,39 @@
     let currentTab = 'tab1';
     let fileStatusText = 'Belum ada file dipilih';
     const STORAGE_KEY = 'krs_simulasi_state_v7';
+    const USER_ID_KEY = 'krs_user_id_v1';
+    const SHARE_PATH_PREFIX = 'schedule'; // ganti di sini kalau mau path lain, mis. 'krs' -> /krs/{id}
     let storageAvailable = true;
     let dbSaved = false;
+
+    // ============================================
+    // USER ID (anonim, disimpan di localStorage supaya
+    // "Simpan Pilihan" / "Muat Pilihan" konsisten per device)
+    // ============================================
+    function getUserId() {
+        try {
+            let uid = localStorage.getItem(USER_ID_KEY);
+            if (!uid) {
+                uid = 'u_' + generateShareId(12);
+                localStorage.setItem(USER_ID_KEY, uid);
+            }
+            const hint = document.getElementById('user-id-hint');
+            if (hint) hint.textContent = 'ID kamu: ' + uid + ' (tersimpan di browser ini)';
+            return uid;
+        } catch (e) {
+            return 'anon_' + generateShareId(8);
+        }
+    }
+
+    // Generator kode acak pendek (dipakai untuk user id & share id)
+    function generateShareId(length = 7) {
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; // tanpa 0/O/1/l/I biar gak ambigu
+        let result = '';
+        const arr = new Uint32Array(length);
+        crypto.getRandomValues(arr);
+        for (let i = 0; i < length; i++) result += chars[arr[i] % chars.length];
+        return result;
+    }
 
     // ============================================
     // SUPABASE FUNCTIONS
@@ -487,34 +523,122 @@
     }
 
     // ============================================
+    // PILIHAN USER (tabel krs_pilihan)
+    // ============================================
+    async function savePilihanToSupabase() {
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
+        const items = getSelectedItems().filter(item => item.status === 'selected');
+        if (items.length === 0) { showToast('Belum ada pilihan kelas untuk disimpan.'); return; }
+        try {
+            showToast('☁️ Menyimpan pilihan ke Cloud...');
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const uid = getUserId();
+
+            // Ganti semua baris lama milik user ini dengan pilihan yang sekarang
+            const { error: delErr } = await supabaseClient.from('krs_pilihan').delete().eq('user_id', uid);
+            if (delErr) throw delErr;
+
+            const rows = items.map(item => ({
+                user_id: uid,
+                kode: item.kode,
+                kelas: item.kelas,
+                semester: item.semester,
+                status: 'dipilih',
+            }));
+            const { error: insErr } = await supabaseClient.from('krs_pilihan').insert(rows);
+            if (insErr) throw insErr;
+
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('db-status-indicator').style.display = 'inline-block';
+            document.getElementById('db-status-indicator').className = 'db-status saved';
+            document.getElementById('db-status-indicator').textContent = '☁️ Pilihan tersimpan (' + rows.length + ')';
+            showToast('✅ ' + rows.length + ' pilihan berhasil disimpan ke Cloud!');
+        } catch (err) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            console.error(err);
+            showToast('❌ Gagal menyimpan pilihan: ' + err.message);
+        }
+    }
+
+    async function loadPilihanFromSupabase() {
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
+        const hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
+        if (!hasCatalog) { showToast('⚠️ Muat/upload data mata kuliah dulu sebelum memuat pilihan.'); return; }
+        try {
+            showToast('📥 Memuat pilihan tersimpan...');
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const uid = getUserId();
+            const { data: rows, error: err } = await supabaseClient.from('krs_pilihan').select('*').eq('user_id', uid);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if (err) throw err;
+            if (!rows || rows.length === 0) { showToast('⚠️ Belum ada pilihan tersimpan untuk kamu di Cloud.'); return; }
+
+            rows.forEach(r => {
+                const sem = r.semester;
+                if (!selected[sem]) selected[sem] = {};
+                selected[sem][r.kode] = r.kelas;
+            });
+            renderAll(); updateSummary(); updateJadwalMingguan(); saveState();
+            showToast('✅ ' + rows.length + ' pilihan berhasil dimuat dari Cloud!');
+        } catch (err) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            console.error(err);
+            showToast('❌ Gagal memuat pilihan: ' + err.message);
+        }
+    }
+
+    // ============================================
     // SHARE LINK FUNCTIONS
     // ============================================
-    function generateShareLink() {
+    async function generateShareLink() {
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa membuat link singkat.'); return; }
         const items = getSelectedItems().filter(item => item.status === 'selected');
         if (items.length === 0) { showToast('Belum ada pilihan kelas untuk dibagikan.'); return; }
-        const payload = { v: 2, d: items.map(item => ({ 
-            k: item.kode, 
-            kl: item.kelas, 
-            n: item.nama, 
-            h: item.hari, 
-            j: item.jam, 
-            r: item.ruang, 
-            ds: item.dosen || '', 
-            s: item.sks, 
+        const payload = items.map(item => ({
+            k: item.kode,
+            kl: item.kelas,
+            n: item.nama,
+            h: item.hari,
+            j: item.jam,
+            r: item.ruang,
+            ds: item.dosen || '',
+            s: item.sks,
             sk: item.sks_detail || '',
-            kat: item.kategori || 'Wajib', 
+            kat: item.kategori || 'Wajib',
             sem: item.semester,
             no: item.no || ''
-        })) };
-        const encoded = encodeURIComponent(JSON.stringify(payload));
-        const url = new URL(window.location.href);
-        url.searchParams.set('share', encoded);
-        const shareUrl = url.toString();
-        const area = document.getElementById('share-link-area');
-        area.style.display = 'block';
-        document.getElementById('share-link-url').textContent = shareUrl;
-        area.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        showToast('🔗 Link berbagi berhasil dibuat!');
+        }));
+        try {
+            showToast('🔗 Membuat link berbagi...');
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            let shareId = null, lastErr = null;
+            // Coba beberapa kali kalau kebetulan share_id-nya sudah dipakai (unique constraint)
+            for (let attempt = 0; attempt < 5 && !shareId; attempt++) {
+                const candidate = generateShareId(7);
+                const { error: err } = await supabaseClient.from('krs_shared').insert({
+                    share_id: candidate,
+                    user_id: getUserId(),
+                    data: payload,
+                });
+                if (!err) { shareId = candidate; }
+                else if (err.code === '23505') { lastErr = err; continue; }
+                else { lastErr = err; break; }
+            }
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if (!shareId) throw (lastErr || new Error('Gagal membuat kode berbagi yang unik.'));
+
+            const shareUrl = window.location.origin + '/' + SHARE_PATH_PREFIX + '/' + shareId;
+            const area = document.getElementById('share-link-area');
+            area.style.display = 'block';
+            document.getElementById('share-link-url').textContent = shareUrl;
+            area.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showToast('🔗 Link berbagi berhasil dibuat!');
+        } catch (err) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            console.error(err);
+            showToast('❌ Gagal membuat link berbagi: ' + err.message);
+        }
     }
 
     function copyShareLink() {
@@ -533,6 +657,36 @@
         });
     }
 
+    // Muat jadwal dari share_id yang tersimpan di tabel krs_shared (link pendek /schedule/{id})
+    async function loadFromShareId(shareId) {
+        if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa memuat link berbagi.'); return; }
+        try {
+            showToast('📋 Memuat jadwal dari link berbagi...');
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const { data: row, error: err } = await supabaseClient
+                .from('krs_shared')
+                .select('*')
+                .eq('share_id', shareId)
+                .maybeSingle();
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if (err) throw err;
+            if (!row) { showToast('⚠️ Link tidak ditemukan (mungkin salah ketik atau sudah dihapus).'); return; }
+            if (row.expires_at && new Date(row.expires_at) < new Date()) { showToast('⚠️ Link berbagi ini sudah kedaluwarsa.'); return; }
+
+            applySharedPayload(row.data || []);
+            fileStatusText = '📋 Dimuat dari link berbagi (' + shareId + ')';
+            document.getElementById('file-status').textContent = fileStatusText;
+            showApp();
+            saveState();
+            showToast('✅ Jadwal berhasil dimuat dari link!');
+        } catch (err) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            console.error(err);
+            showToast('❌ Gagal memuat link: ' + err.message);
+        }
+    }
+
+    // Fallback untuk link lama berformat ?share=<base64> (kalau masih ada yang beredar)
     function loadFromShareLink() {
         const url = new URL(window.location.href);
         const shareParam = url.searchParams.get('share');
@@ -541,33 +695,8 @@
             const decoded = decodeURIComponent(shareParam);
             const payload = JSON.parse(decoded);
             if (payload.v !== 2 || !payload.d || !Array.isArray(payload.d)) { showToast('⚠️ Format link tidak valid.'); return; }
-            data = {1:[],3:[],5:[],7:[],8:[]};
-            selected = {1:{},3:{},5:{},7:{},8:{}};
-            taken = {};
-            const semMap = {};
-            payload.d.forEach(item => {
-                const sem = item.sem || 5;
-                if (!semMap[sem]) semMap[sem] = [];
-                semMap[sem].push({
-                    no: item.no || '',
-                    kode: item.k,
-                    kelas: item.kl,
-                    nama: item.n,
-                    hari: item.h,
-                    jam: item.j,
-                    ruang: item.r,
-                    dosen: item.ds || '',
-                    sks: item.s || '0',
-                    sks_detail: item.sk || '',
-                    kategori: item.kat || 'Wajib',
-                });
-                if (!selected[sem]) selected[sem] = {};
-                selected[sem][item.k] = item.kl;
-            });
-            for (let sem of ALL_SEMESTERS) {
-                if (semMap[sem]) { data[sem] = semMap[sem]; }
-            }
-            fileStatusText = '📋 Dimuat dari link berbagi';
+            applySharedPayload(payload.d);
+            fileStatusText = '📋 Dimuat dari link berbagi (lama)';
             document.getElementById('file-status').textContent = fileStatusText;
             showApp();
             saveState();
@@ -580,7 +709,44 @@
         }
     }
 
+    // Helper bersama: taruh array item {k,kl,n,h,j,r,ds,s,sk,kat,sem,no} ke state data/selected
+    function applySharedPayload(items) {
+        data = {1:[],3:[],5:[],7:[],8:[]};
+        selected = {1:{},3:{},5:{},7:{},8:{}};
+        taken = {};
+        const semMap = {};
+        (items || []).forEach(item => {
+            const sem = item.sem || 5;
+            if (!semMap[sem]) semMap[sem] = [];
+            semMap[sem].push({
+                no: item.no || '',
+                kode: item.k,
+                kelas: item.kl,
+                nama: item.n,
+                hari: item.h,
+                jam: item.j,
+                ruang: item.r,
+                dosen: item.ds || '',
+                sks: item.s || '0',
+                sks_detail: item.sk || '',
+                kategori: item.kat || 'Wajib',
+            });
+            if (!selected[sem]) selected[sem] = {};
+            selected[sem][item.k] = item.kl;
+        });
+        for (let sem of ALL_SEMESTERS) {
+            if (semMap[sem]) { data[sem] = semMap[sem]; }
+        }
+    }
+
     function checkShareOnLoad() {
+        // Format baru: https://domain/schedule/{share_id}
+        const path = window.location.pathname;
+        const re = new RegExp('/' + SHARE_PATH_PREFIX + '/([A-Za-z0-9_-]+)');
+        const m = path.match(re);
+        if (m) { setTimeout(() => loadFromShareId(m[1]), 300); return; }
+
+        // Format lama: ?share=<base64> — tetap didukung untuk link yang sudah terlanjur dibagikan
         const url = new URL(window.location.href);
         if (url.searchParams.has('share')) {
             setTimeout(loadFromShareLink, 500);
@@ -948,6 +1114,7 @@
     // ============================================
     // AUTO-RESTORE & SHARE CHECK
     // ============================================
+    getUserId();
     restoreState();
     checkShareOnLoad();
 </script>
