@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulasi KRS UMK Teknik Informatika</title>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -395,10 +397,18 @@
     const NIM_STORAGE_KEY = 'krs_logged_in_nim_v1';
     const AUTH_TABLE = 'mahasiswa_akun';
     let currentNim = null;
-    const SHARE_QUERY_PARAM = 's'; // Masih dipakai untuk fallback
+    const SHARE_QUERY_PARAM = 's'; // Fallback
     let storageAvailable = true;
     let dbSaved = false;
 
+    // ============================================
+    // VIEW MODE (MODE JADWAL SAJA)
+    // ============================================
+    let isViewOnly = false; // TRUE jika URL diawali /schedule/
+
+    // ============================================
+    // USER ID
+    // ============================================
     function getUserId() {
         if (!currentNim) { showToast('⚠️ Silakan masuk dengan NIM dulu.'); throw new Error('Belum login'); }
         return currentNim;
@@ -551,6 +561,7 @@
     // PILIHAN USER
     // ============================================
     async function savePilihanToSupabase() {
+        if (isViewOnly) { showToast('⚠️ Mode hanya baca.'); return; }
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
         const items = getSelectedItems().filter(item => item.status === 'selected');
         if (items.length === 0) { showToast('Belum ada pilihan kelas untuk disimpan.'); return; }
@@ -585,6 +596,7 @@
     }
 
     async function loadPilihanFromSupabase() {
+        if (isViewOnly) return; // Jangan load pilihan kalau mode view only
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
         const hasCatalog = ALL_SEMESTERS.some(sem => (data[sem] || []).length > 0);
         if (!hasCatalog) { showToast('⚠️ Muat data mata kuliah dulu sebelum memuat pilihan.'); return; }
@@ -612,7 +624,7 @@
     }
 
     // ============================================
-    // SHARE LINK FUNCTIONS (UBAH DI SINI AGAR LINK JADI /schedule/id)
+    // SHARE LINK FUNCTIONS
     // ============================================
     async function generateShareLink() {
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa membuat link singkat.'); return; }
@@ -651,7 +663,7 @@
             document.getElementById('loadingOverlay').style.display = 'none';
             if (!shareId) throw (lastErr || new Error('Gagal membuat kode berbagi yang unik.'));
 
-            // ✅ UBAH DI SINI: Gunakan /schedule/ alih-alih ?s=
+            // ✅ UBAH DISINI: Gunakan /schedule/
             const shareUrl = window.location.origin + '/schedule/' + shareId;
             
             const area = document.getElementById('share-link-area');
@@ -699,9 +711,15 @@
 
             applySharedPayload(row.data || []);
             fileStatusText = '📋 Dimuat dari link berbagi (' + shareId + ')';
+            
+            // ✅ MODE VIEW ONLY: Cegah render menu
+            isViewOnly = true; 
+            
             showApp();
             saveState();
             showToast('✅ Jadwal berhasil dimuat dari link!');
+            
+            // Hapus query param dari URL jika ada
             const url = new URL(window.location.href);
             url.searchParams.delete(SHARE_QUERY_PARAM);
             window.history.replaceState({}, '', url.toString());
@@ -722,6 +740,7 @@
             if (payload.v !== 2 || !payload.d || !Array.isArray(payload.d)) { showToast('⚠️ Format link tidak valid.'); return; }
             applySharedPayload(payload.d);
             fileStatusText = '📋 Dimuat dari link berbagi (lama)';
+            isViewOnly = true;
             showApp();
             saveState();
             showToast('✅ Jadwal berhasil dimuat dari link!');
@@ -763,6 +782,17 @@
     }
 
     function checkShareOnLoad() {
+        // ✅ CEK PATH /schedule/ DULU
+        const path = window.location.pathname;
+        if (path.startsWith('/schedule/')) {
+            const shareId = path.replace('/schedule/', '');
+            if (shareId && shareId.length > 0) {
+                setTimeout(() => loadFromShareId(shareId), 300);
+                return;
+            }
+        }
+
+        // Fallback query param
         const url = new URL(window.location.href);
         const shortId = url.searchParams.get(SHARE_QUERY_PARAM);
         if (shortId) { setTimeout(() => loadFromShareId(shortId), 300); return; }
@@ -789,7 +819,26 @@
     function showApp() {
         document.getElementById('emptyCatalogNotice').style.display='none';
         document.getElementById('mainContent').classList.remove('hidden');
-        renderAll(); updateSummary(); updateJadwalMingguan(); switchTab(currentTab);
+        
+        // ✅ JIKA MODE VIEW ONLY, SEMBUNYIKAN SEMUA MENU KRS & LOGIN
+        if (isViewOnly) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('accountBar').style.display = 'none';
+            document.querySelector('.header-info').style.display = 'none';
+            document.querySelector('.legend').style.display = 'none';
+            document.querySelector('.tab-section').style.display = 'none';
+            document.querySelector('.main-layout').style.display = 'none'; // Hilangkan list MK dan tombol simpan
+            
+            // Ubah judul halaman
+            document.querySelector('.kicker').style.display = 'none';
+            document.querySelector('h1').innerHTML = 'Jadwal Kuliah';
+            document.querySelector('h1::after').textContent = '';
+        }
+
+        renderAll(); 
+        updateSummary(); 
+        updateJadwalMingguan(); 
+        switchTab(currentTab);
     }
     function restoreState() {
         const saved=loadState();
@@ -799,11 +848,6 @@
         if(!hasData) { updateStorageIndicator('cleared'); return false; }
         data=saved.data; selected=saved.selected||{}; taken=saved.taken||{}; currentTab=saved.currentTab||'tab1'; fileStatusText=saved.fileStatusText||'Data dipulihkan';
         updateStorageIndicator('restored'); return true;
-    }
-
-    function initApp() {
-        selected={1:{},3:{},5:{},7:{},8:{}}; taken={}; currentTab='tab1';
-        showApp(); saveState();
     }
 
     // ============================================
@@ -821,6 +865,7 @@
     }
 
     function toggleKelas(semester,kode,kelas){
+        if (isViewOnly) return; // Jangan bisa toggle di mode view
         const sem = parseInt(semester);
         const item = data[sem]?.find(i => i.kode === kode && i.kelas === kelas);
         if(item && item.hari === 'Tidak tersedia') { showToast('⚠️ Mata kuliah ini belum memiliki jadwal.'); return; }
@@ -861,7 +906,7 @@
             group.forEach(item=>{
                 const isSelected = semSelected[kode]===item.kelas && !isTaken;
                 const isNoSchedule = item.hari === 'Tidak tersedia';
-                const isDisabled = isTaken || isNoSchedule;
+                const isDisabled = isTaken || isNoSchedule || isViewOnly;
                 
                 let classes = 'kelas-item';
                 if(isSelected) classes += ' selected';
@@ -922,12 +967,16 @@
             if(item.kategori && item.kategori.toLowerCase()==='pilihan') pilihanSKS+=s;
             else wajibSKS+=s;
         });
-        document.getElementById('total-sks-display').textContent=totalSKS;
-        document.getElementById('taken-display').textContent=takenCount;
-        let totalMK=0;
-        for(let sem of ALL_SEMESTERS) totalMK += (data[sem]||[]).length;
-        const availableMK=totalMK-takenCount;
-        document.getElementById('total-mk-display').textContent=availableMK+' (dari '+totalMK+')';
+        
+        // Update header info (hanya jika tidak view only)
+        if (!isViewOnly) {
+            document.getElementById('total-sks-display').textContent=totalSKS;
+            document.getElementById('taken-display').textContent=takenCount;
+            let totalMK=0;
+            for(let sem of ALL_SEMESTERS) totalMK += (data[sem]||[]).length;
+            const availableMK=totalMK-takenCount;
+            document.getElementById('total-mk-display').textContent=availableMK+' (dari '+totalMK+')';
+        }
 
         const summaryDiv=document.getElementById('summary-list');
         let html='';
@@ -984,9 +1033,15 @@
             }); cell.innerHTML=html; }
         });
         document.getElementById('jadwal-subjudul').textContent='Semester 1 / 3 / 5 / 7 / 8 | Total SKS: '+totalSKS+' | '+selectedItems.length+' mata kuliah';
+        
+        // ✅ MODE VIEW ONLY: Tampilkan tabel jadwal saja
+        if (isViewOnly) {
+            document.getElementById('jadwal-mingguan').style.display = 'block';
+        }
     }
 
     function exportImage(){
+        if (isViewOnly) return;
         const selectedItems=getSelectedItems().filter(item=>item.status==='selected' && item.hari!=='Tidak tersedia');
         if(selectedItems.length===0){ showToast('Belum ada pilihan kelas yang memiliki jadwal.'); return; }
         document.getElementById('jadwal-mingguan').style.display='block';
@@ -1007,6 +1062,7 @@
     }
 
     function saveSelection(){
+        if (isViewOnly) return;
         const items=getSelectedItems();
         const selectedOnly=items.filter(item=>item.status!=='taken');
         if(selectedOnly.length===0){ showToast('Belum ada pilihan kelas.'); return; }
@@ -1036,7 +1092,10 @@
         showToast('File JSON berhasil di-download.');
     }
 
-    function resetSelection(){ selected={1:{},3:{},5:{},7:{},8:{}}; renderAll(); updateSummary(); updateJadwalMingguan(); document.getElementById('output-area').textContent=''; document.getElementById('jadwal-mingguan').style.display='none'; document.getElementById('share-link-area').style.display='none'; saveState(); showToast('Reset selesai'); }
+    function resetSelection(){ 
+        if (isViewOnly) return;
+        selected={1:{},3:{},5:{},7:{},8:{}}; renderAll(); updateSummary(); updateJadwalMingguan(); document.getElementById('output-area').textContent=''; document.getElementById('jadwal-mingguan').style.display='none'; document.getElementById('share-link-area').style.display='none'; saveState(); showToast('Reset selesai'); 
+    }
     function showToast(msg){ const toast=document.getElementById('toast'); toast.textContent=msg; toast.style.display='block'; clearTimeout(toast._timeout); toast._timeout=setTimeout(()=>{ toast.style.display='none'; },3000); }
 
     // ============================================
