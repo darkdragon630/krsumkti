@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi KRS UMK Teknik Informatika</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js">
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== S T Y L E S ===== */
+        /* ===================================================
+           SWISS INTERNATIONAL STYLE — TOKENS
+           =================================================== */
+        :root {
+            --bg: #F3F3EF;
+            --surface: #FFFFFF;
+            --ink: #0A0A0A;
+            --ink-soft: #6B6B64;
+            --ink-faint: #9A9A93;
+            --line: #D6D6D0;
+            --line-strong: #0A0A0A;
+            --red: #D4300C;
+            --red-tint: #FBE9E4;
+            --taken: #A6A69F;
+            --taken-tint: #ECECE8;
+            --sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+            --grid-gap: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--sans);
+        }
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            padding: 48px 32px 96px;
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+        .kicker {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: left;
+            color: var(--ink);
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+            border-bottom: 4px solid var(--ink);
+            padding-bottom: 20px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        h1::after {
+            content: "SEM. 05 / 07";
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--red);
+            text-transform: none;
+            white-space: nowrap;
+        }
+
+        /* ===== UPLOAD ===== */
+        .upload-section {
+            background: var(--surface);
+            border: 1px solid var(--ink);
+            border-radius: 0;
+            padding: 48px 40px;
+            text-align: left;
+            margin-bottom: 32px;
+            position: relative;
+        }
+        .upload-section::before {
+            content: "01 — SUMBER DATA";
+            display: block;
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--red);
+            margin-bottom: 24px;
+        }
+        .upload-section input[type="file"] {
+            padding: 10px 0;
+            font-size: 14px;
+            margin: 4px 0 20px;
+            font-family: var(--mono);
+            border: none;
+            border-bottom: 1px solid var(--line);
+            background: transparent;
+            width: 100%;
+            max-width: 420px;
+        }
+        .btn-upload,
+        .btn-sample {
+            background: var(--ink);
+            color: var(--surface);
+            border: 1px solid var(--ink);
+            border-radius: 0;
+            padding: 12px 28px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.12s ease, color 0.12s ease;
+        }
+        .btn-upload:hover {
+            background: var(--red);
+            border-color: var(--red);
+        }
+        .btn-sample {
+            background: transparent;
+            color: var(--ink);
+            margin-left: 12px;
+        }
+        .btn-sample:hover {
+            background: var(--ink);
+            color: var(--surface);
+        }
+
+        .header-info {
+            background: var(--ink);
+            color: var(--surface);
+            padding: 18px 24px;
+            border-radius: 0;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-family: var(--mono);
+        }
+        .header-info .total {
+            font-size: 13px;
+            letter-spacing: 0.02em;
+            padding-right: 20px;
+            border-right: 1px solid rgba(255,255,255,0.25);
+        }
+        .header-info .total:last-child {
+            border-right: none;
+        }
+        .header-info .total span {
+            font-weight: 700;
+            color: var(--surface);
+        }
+        .header-info .sks-total {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-weight: 700;
+            border-right: none;
+        }
+        .header-info .sks-total span {
+            color: var(--red);
+        }
+
+        /* ===== TABS ===== */
+        .tab-section {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--line);
+        }
+        .tab-btn {
+            padding: 12px 28px 12px 0;
+            margin-right: 32px;
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            transition: color 0.12s ease, border-color 0.12s ease;
+        }
+        .tab-btn:hover {
+            color: var(--ink);
+        }
+        .tab-btn.active {
+            background: transparent;
+            color: var(--ink);
+            border-color: var(--red);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: var(--grid-gap);
+        }
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            h1 { flex-direction: column; align-items: flex-start; gap: 6px; }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 0;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .card h2 {
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 12px;
+        }
+
+        .mk-group {
+            margin-bottom: 12px;
+            border: 1px solid var(--line);
+            border-radius: 0;
+            overflow: hidden;
+        }
+        .mk-header {
+            background: var(--bg);
+            padding: 12px 16px;
+            font-family: var(--mono);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+        }
+        .mk-header .sks-badge-header {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--ink);
+            padding: 2px 10px;
+            border-radius: 0;
+            font-size: 11px;
+            font-family: var(--mono);
+        }
+        .mk-header .taken-badge {
+            background: transparent;
+            color: var(--taken);
+            border: 1px solid var(--taken);
+            padding: 2px 10px;
+            border-radius: 0;
+            font-size: 11px;
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .mk-body {
+            padding: 8px;
+        }
+
+        .kelas-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            margin: 4px 0;
+            border-radius: 0;
+            border: 1px solid var(--line);
+            transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .kelas-item:hover {
+            border-color: var(--ink);
+        }
+        .kelas-item.selected {
+            background: var(--ink);
+            color: var(--surface);
+            border-color: var(--ink);
+            box-shadow: none;
+        }
+        .kelas-item.selected .info .kelas-label,
+        .kelas-item.selected .info .time {
+            color: var(--surface);
+        }
+        .kelas-item.selected .info .ruang,
+        .kelas-item.selected .info .dosen {
+            color: rgba(255,255,255,0.7);
+        }
+        .kelas-item.selected .sks-badge {
+            border-color: var(--surface);
+            color: var(--surface);
+        }
+        .kelas-item.taken {
+            background: var(--taken-tint);
+            border-color: var(--line);
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+        .kelas-item.taken .info .kelas-label::after {
+            content: " — DIAMBIL";
+            color: var(--taken);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            font-family: var(--mono);
+        }
+        .kelas-item input[type="checkbox"] {
+            margin-right: 14px;
+            accent-color: var(--ink);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .kelas-item.taken input[type="checkbox"] {
+            accent-color: var(--taken);
+            cursor: not-allowed;
+        }
+        .kelas-item .info {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 16px;
+            align-items: center;
+        }
+        .kelas-item .info .kelas-label {
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--ink);
+            min-width: 22px;
+        }
+        .kelas-item .info .time {
+            color: var(--ink-soft);
+            font-size: 13px;
+            font-family: var(--mono);
+        }
+        .kelas-item .info .ruang {
+            color: var(--ink-faint);
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+        .kelas-item .info .dosen {
+            color: var(--ink-soft);
+            font-size: 12px;
+        }
+        .kelas-item .sks-badge {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--line);
+            padding: 2px 10px;
+            border-radius: 0;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--mono);
+            flex-shrink: 0;
+        }
+
+        .summary-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 0;
+            padding: 24px;
+            position: sticky;
+            top: 24px;
+        }
+        .summary-card h2 {
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 12px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 13px;
+            font-family: var(--mono);
+        }
+        .summary-item .mk {
+            font-weight: 500;
+        }
+        .summary-item .kelas {
+            color: var(--ink);
+            font-weight: 700;
+        }
+        .summary-item .kelas.taken {
+            color: var(--taken);
+        }
+        .summary-item .kelas.empty {
+            color: var(--ink-faint);
+            font-weight: 400;
+        }
+        .summary-item .time {
+            color: var(--ink-soft);
+        }
+        .summary-total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: 14px;
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .summary-conflict {
+            color: var(--red);
+            font-weight: 600;
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: var(--red-tint);
+            border-radius: 0;
+            border: 1px solid var(--red);
+            font-size: 13px;
+        }
+        .summary-conflict ul {
+            margin-left: 18px;
+            font-weight: 400;
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+        .summary-conflict li {
+            color: var(--red);
+        }
+
+        .btn-save,
+        .btn-export-img,
+        .btn-reset {
+            border-radius: 0;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+        }
+        .btn-save {
+            background: var(--ink);
+            color: var(--surface);
+            border: 1px solid var(--ink);
+            padding: 13px 20px;
+            margin-top: 18px;
+        }
+        .btn-save:hover {
+            background: var(--red);
+            border-color: var(--red);
+        }
+        .btn-export-img {
+            background: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--ink);
+            padding: 12px 20px;
+            margin-top: 10px;
+        }
+        .btn-export-img:hover {
+            background: var(--ink);
+            color: var(--surface);
+        }
+        .btn-reset {
+            background: transparent;
+            color: var(--ink-soft);
+            border: 1px solid var(--line);
+            padding: 10px 16px;
+            margin-top: 10px;
+        }
+        .btn-reset:hover {
+            border-color: var(--ink);
+            color: var(--ink);
+        }
+
+        #output-area {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 0;
+            border: 1px solid var(--line);
+            font-family: var(--mono);
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* ===== JADWAL MINGGUAN ===== */
+        #jadwal-mingguan {
+            background: var(--surface);
+            padding: 32px;
+            border: 1px solid var(--ink);
+            border-radius: 0;
+            margin-top: 24px;
+            font-family: var(--sans);
+            display: none;
+        }
+        #jadwal-mingguan .judul {
+            text-align: left;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+        #jadwal-mingguan .sub-judul {
+            text-align: left;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--ink-soft);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--ink);
+        }
+        #jadwal-mingguan table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        #jadwal-mingguan th {
+            background: var(--ink);
+            color: var(--surface);
+            padding: 10px 8px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--ink);
+        }
+        #jadwal-mingguan td {
+            padding: 10px 8px;
+            border: 1px solid var(--line);
+            vertical-align: top;
+            min-height: 60px;
+        }
+        #jadwal-mingguan .hari-label {
+            font-weight: 700;
+            text-align: left;
+            background: var(--bg);
+            width: 90px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+        }
+        #jadwal-mingguan .mk-item {
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 4px 0;
+            padding: 6px 10px;
+            border-radius: 0;
+            background: var(--bg);
+            border-left: 3px solid var(--ink);
+        }
+        #jadwal-mingguan .mk-item .kode {
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--ink);
+        }
+        #jadwal-mingguan .mk-item .nama-mk {
+            font-weight: 500;
+            color: var(--ink);
+        }
+        #jadwal-mingguan .mk-item .ruang {
+            color: var(--ink-soft);
+            font-size: 11px;
+            font-family: var(--mono);
+        }
+        #jadwal-mingguan .mk-item .dosen-mk {
+            color: var(--ink-faint);
+            font-size: 11px;
+            font-style: normal;
+            font-family: var(--mono);
+        }
+        #jadwal-mingguan .mk-item.taken-item {
+            background: var(--taken-tint);
+            border-left-color: var(--taken);
+        }
+        #jadwal-mingguan .mk-item.taken-item .kode {
+            color: var(--taken);
+        }
+        #jadwal-mingguan .footer {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--ink-soft);
+            border-top: 1px solid var(--line);
+            padding-top: 12px;
+        }
+        #jadwal-mingguan .total-sks-footer {
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--ink);
+            color: var(--surface);
+            padding: 14px 22px;
+            border-radius: 0;
+            border-left: 4px solid var(--red);
+            box-shadow: none;
+            display: none;
+            z-index: 999;
+            font-family: var(--mono);
+            font-size: 13px;
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(16px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .legend {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            padding: 12px 0 20px;
+            font-size: 12px;
+            font-family: var(--mono);
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 24px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 0;
+            border: 1px solid var(--line);
+        }
+        .legend-color.selected {
+            background: var(--ink);
+            border-color: var(--ink);
+        }
+        .legend-color.taken {
+            background: var(--taken-tint);
+            border-color: var(--taken);
+        }
+        .legend-color.available {
+            background: var(--surface);
+            border-color: var(--line);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-overlay .spinner {
+            background: var(--surface);
+            padding: 32px 44px;
+            border-radius: 0;
+            text-align: center;
+        }
+        .loading-overlay .spinner .spin {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--line);
+            border-top: 3px solid var(--red);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loading-overlay .spinner p {
+            margin-top: 12px;
+            color: var(--ink);
+            font-family: var(--mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="kicker">UMK — Teknik Informatika</div>
+        <h1>Simulasi KRS</h1>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--ink-faint);margin-bottom:14px;">FILE .CSV</div>
+            <h3 style="color:var(--ink);margin-bottom:10px;font-weight:700;">Upload File CSV Jadwal</h3>
+            <p style="color:var(--ink-soft);margin-bottom:15px;">Upload file CSV dari hasil scraping (jadwal_all_semester.csv)</p>
+            <input type="file" id="csvFile" accept=".csv" style="margin-bottom:15px;">
+            <br>
+            <button class="btn-upload" onclick="loadCSV()">Upload &amp; Proses</button>
+            <button class="btn-sample" onclick="loadSampleData()">Gunakan Data Sample</button>
+            <div style="margin-top:15px;color:var(--ink-soft);font-size:13px;">
+                <span id="file-status">Belum ada file dipilih</span>
+            </div>
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <span id="storage-indicator" style="font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-faint);text-transform:uppercase;">Belum ada data tersimpan</span>
+                <button type="button" onclick="clearSavedData()" style="background:transparent;border:1px solid var(--line);color:var(--ink-soft);padding:6px 14px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;">Hapus Data Tersimpan</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="hidden">
+            <div class="header-info">
+                <div class="total">Total <span id="total-mk-display">0</span> mata kuliah</div>
+                <div class="total">Sudah diambil: <span id="taken-display">0</span> MK</div>
+                <div class="total sks-total">Total SKS: <span id="total-sks-display">0</span></div>
+                <div class="total" id="status-display">Belum ada bentrok</div>
+                <div class="total" id="storage-indicator-live" style="border-right:none;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.55);">—</div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color available"></div><span>Tersedia (belum dipilih)</span></div>
+                <div class="legend-item"><div class="legend-color selected"></div><span>Dipilih</span></div>
+                <div class="legend-item"><div class="legend-color taken"></div><span>Sudah Diambil</span></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-section">
+                <button class="tab-btn active" data-tab="tab5" onclick="switchTab('tab5')">Semester 5</button>
+                <button class="tab-btn" data-tab="tab7" onclick="switchTab('tab7')">Semester 7</button>
+            </div>
+
+            <div class="main-layout">
+                <div>
+                    <div class="card">
+                        <h2>02 — Pilih Kelas · klik untuk toggle, klik lagi untuk batal</h2>
+                        <div id="tab5" class="tab-content active"><div id="mk-list-5"></div></div>
+                        <div id="tab7" class="tab-content"><div id="mk-list-7"></div></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="summary-card">
+                        <h2>03 — Ringkasan Pilihan</h2>
+                        <div id="summary-list"></div>
+                        <button class="btn-save" onclick="saveSelection()">Simpan Pilihan (JSON)</button>
+                        <button class="btn-export-img" onclick="exportImage()">Export Jadwal Mingguan (JPG)</button>
+                        <button class="btn-reset" onclick="resetSelection()">Reset Semua</button>
+                        <div id="output-area"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jadwal Mingguan -->
+            <div id="jadwal-mingguan">
+                <div class="judul">Jadwal Kuliah</div>
+                <div class="sub-judul" id="jadwal-subjudul">Semester 5 & 7</div>
+                <table>
+                    <thead><tr><th style="width:80px;">HARI</th><th>JADWAL KULIAH</th></tr></thead>
+                    <tbody id="jadwal-body">
+                        <tr><td class="hari-label">SENIN</td><td id="senin"></td></tr>
+                        <tr><td class="hari-label">SELASA</td><td id="selasa"></td></tr>
+                        <tr><td class="hari-label">RABU</td><td id="rabu"></td></tr>
+                        <tr><td class="hari-label">KAMIS</td><td id="kamis"></td></tr>
+                        <tr><td class="hari-label">JUMAT</td><td id="jumat"></td></tr>
+                        <tr><td class="hari-label">SABTU</td><td id="sabtu"></td></tr>
+                        <tr><td class="hari-label">MINGGU</td><td id="minggu"></td></tr>
+                    </tbody>
+                </table>
+                <div class="footer">
+                    <span>Total SKS: <span id="footer-sks">0</span></span>
+                    <span id="footer-info"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"><div class="spin"></div><p>Sedang memproses gambar...</p></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // DATA SAMPLE (Hardcoded)
+        // ============================================
+        const SAMPLE_DATA = {
+            semester5: [
+                {"kode":"GS51","kelas":"A","nama":"Bahasa Indonesia","hari":"Senin","jam":"10:30 - 12:09","ruang":"J.4.10","dosen":"Dr. LUTHFA NUGRAHENI, S.Pd, M.Pd.","sks":2},
+                {"kode":"GS51","kelas":"B","nama":"Bahasa Indonesia","hari":"Senin","jam":"13:50 - 15:29","ruang":"J.4.10","dosen":"Dr. LUTHFA NUGRAHENI, S.Pd, M.Pd.","sks":2},
+                {"kode":"GS51","kelas":"C","nama":"Bahasa Indonesia","hari":"Senin","jam":"12:10 - 13:49","ruang":"J.4.10","dosen":"Dr. LUTHFA NUGRAHENI, S.Pd, M.Pd.","sks":2},
+                {"kode":"GS51","kelas":"D","nama":"Bahasa Indonesia","hari":"Rabu","jam":"08:00 - 09:39","ruang":"J.4.10","dosen":"Dr., Drs. MOHAMMAD KANZUNNUDIN, MPd","sks":2},
+                {"kode":"GS51","kelas":"E","nama":"Bahasa Indonesia","hari":"Jumat","jam":"09:40 - 11:19","ruang":"J.4.10","dosen":"Dr., Drs. MOHAMMAD KANZUNNUDIN, MPd","sks":2},
+                {"kode":"GS51","kelas":"F","nama":"Bahasa Indonesia","hari":"Jumat","jam":"08:00 - 09:39","ruang":"J.4.10","dosen":"Dr., Drs. MOHAMMAD KANZUNNUDIN, MPd","sks":2},
+                {"kode":"IE51","kelas":"E","nama":"Keamanan data dan informasi","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.4.10","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":3},
+                {"kode":"IE51","kelas":"F","nama":"Keamanan data dan informasi","hari":"Selasa","jam":"10:30 - 12:59","ruang":"J.4.03","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":3},
+                {"kode":"IE51","kelas":"A","nama":"Keamanan data dan informasi","hari":"Rabu","jam":"13:00 - 15:29","ruang":"J.4.03","dosen":"ANDRE TRI SAPUTRA, S.Kom., M.Kom.","sks":3},
+                {"kode":"IE51","kelas":"B","nama":"Keamanan data dan informasi","hari":"Kamis","jam":"09:40 - 12:09","ruang":"J.4.04","dosen":"ANDRE TRI SAPUTRA, S.Kom., M.Kom.","sks":3},
+                {"kode":"IE51","kelas":"D","nama":"Keamanan data dan informasi","hari":"Kamis","jam":"11:20 - 13:49","ruang":"J.4.06","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":3},
+                {"kode":"IE51","kelas":"C","nama":"Keamanan data dan informasi","hari":"Selasa","jam":"13:00 - 15:29","ruang":"J.4.03","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":3},
+                {"kode":"IE52","kelas":"C","nama":"Analisis dan Desain Perangkat Lunak","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.3.03","dosen":"TRI LISTYORINI, M.Kom","sks":3},
+                {"kode":"IE52","kelas":"B","nama":"Analisis dan Desain Perangkat Lunak","hari":"Senin","jam":"10:30 - 12:59","ruang":"J.3.03","dosen":"TRI LISTYORINI, M.Kom","sks":3},
+                {"kode":"IE52","kelas":"E","nama":"Analisis dan Desain Perangkat Lunak","hari":"Senin","jam":"10:30 - 12:59","ruang":"J.4.11","dosen":"RIZKYSARI MEIMAHARANI, S.Kom, M.Kom","sks":3},
+                {"kode":"IE52","kelas":"D","nama":"Analisis dan Desain Perangkat Lunak","hari":"Selasa","jam":"08:00 - 10:29","ruang":"J.3.03","dosen":"TRI LISTYORINI, M.Kom","sks":3},
+                {"kode":"IE52","kelas":"A","nama":"Analisis dan Desain Perangkat Lunak","hari":"Selasa","jam":"10:30 - 12:59","ruang":"J.3.03","dosen":"TRI LISTYORINI, M.Kom","sks":3},
+                {"kode":"IE52","kelas":"F","nama":"Analisis dan Desain Perangkat Lunak","hari":"Kamis","jam":"09:40 - 12:09","ruang":"J.3.03","dosen":"RIZKYSARI MEIMAHARANI, S.Kom, M.Kom","sks":3},
+                {"kode":"IE53","kelas":"F","nama":"Sistem Cerdas untuk Industri Kreatif","hari":"Senin","jam":"09:40 - 12:09","ruang":"J.4.03","dosen":"Dr. ANASTASYA LATUBESSY, S.Kom, M.Cs","sks":3},
+                {"kode":"IE53","kelas":"C","nama":"Sistem Cerdas untuk Industri Kreatif","hari":"Selasa","jam":"08:00 - 10:29","ruang":"J.3.01","dosen":"Dr. RINA FIATI, ST. M.Cs","sks":3},
+                {"kode":"IE53","kelas":"D","nama":"Sistem Cerdas untuk Industri Kreatif","hari":"Selasa","jam":"10:30 - 12:59","ruang":"J.3.01","dosen":"Dr. RINA FIATI, ST. M.Cs","sks":3},
+                {"kode":"IE53","kelas":"B","nama":"Sistem Cerdas untuk Industri Kreatif","hari":"Rabu","jam":"08:00 - 10:29","ruang":"J.3.01","dosen":"Dr. RINA FIATI, ST. M.Cs","sks":3},
+                {"kode":"IE53","kelas":"A","nama":"Sistem Cerdas untuk Industri Kreatif","hari":"Rabu","jam":"10:29 - 12:59","ruang":"J.3.01","dosen":"Dr. RINA FIATI, ST. M.Cs","sks":3},
+                {"kode":"IE53","kelas":"E","nama":"Sistem Cerdas untuk Industri Kreatif","hari":"Rabu","jam":"08:00 - 10:29","ruang":"J.3.11","dosen":"Dr. ANASTASYA LATUBESSY, S.Kom, M.Cs","sks":3},
+                {"kode":"IE54","kelas":"D","nama":"Embedded System","hari":"Senin","jam":"08:00 - 09:39","ruang":"J.3.11","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE54","kelas":"C","nama":"Embedded System","hari":"Jumat","jam":"09:40 - 11:19","ruang":"J.4.06","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE54","kelas":"F","nama":"Embedded System","hari":"Selasa","jam":"13:00 - 14:39","ruang":"J.3.11","dosen":"CURIE HABIBA, S.Si., M.Cs.","sks":2},
+                {"kode":"IE54","kelas":"B","nama":"Embedded System","hari":"Kamis","jam":"08:00 - 09:39","ruang":"J.3.03","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE54","kelas":"E","nama":"Embedded System","hari":"Jumat","jam":"13:00 - 14:39","ruang":"J.3.03","dosen":"CURIE HABIBA, S.Si., M.Cs.","sks":2},
+                {"kode":"IE54","kelas":"A","nama":"Embedded System","hari":"Jumat","jam":"08:00 - 09:39","ruang":"J.4.06","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE55","kelas":"A","nama":"Praktikum Embedded System","hari":"Selasa","jam":"08:00 - 10:29","ruang":"I.3.05","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE55","kelas":"B","nama":"Praktikum Embedded System","hari":"Selasa","jam":"10:30 - 12:59","ruang":"I.3.05","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE55","kelas":"C","nama":"Praktikum Embedded System","hari":"Selasa","jam":"13:00 - 15:29","ruang":"I.3.05","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE55","kelas":"E","nama":"Praktikum Embedded System","hari":"Kamis","jam":"08:00 - 10:29","ruang":"I.3.06","dosen":"CURIE HABIBA, S.Si., M.Cs.","sks":2},
+                {"kode":"IE55","kelas":"F","nama":"Praktikum Embedded System","hari":"Kamis","jam":"10:30 - 12:59","ruang":"I.3.06","dosen":"CURIE HABIBA, S.Si., M.Cs.","sks":2},
+                {"kode":"IE55","kelas":"D","nama":"Praktikum Embedded System","hari":"Kamis","jam":"13:00 - 15:29","ruang":"I.3.04","dosen":"WIBOWO HARRY SUGIHARTO, S.Kom., M.Kom.","sks":2},
+                {"kode":"IE56","kelas":"A","nama":"Pengenalan Pola","hari":"Rabu","jam":"08:00 - 10:29","ruang":"J.3.03","dosen":"ENDANG SUPRIYATI, S.Kom, M.Kom","sks":3},
+                {"kode":"IE57","kelas":"X","nama":"Kuliah Kerja Lapangan","hari":"Tidak tersedia","jam":"Tidak tersedia","ruang":"Tidak tersedia","dosen":"","sks":1},
+                {"kode":"IE73","kelas":"A","nama":"Computer Vision","hari":"Kamis","jam":"08:00 - 10:29","ruang":"J.4.11","dosen":"ENDANG SUPRIYATI, S.Kom, M.Kom","sks":3},
+                {"kode":"OAI51","kelas":"A","nama":"Sains Data","hari":"Rabu","jam":"13:00 - 15:29","ruang":"J.4.11","dosen":"Dr. AHMAD ABDUL CHAMID, S.Kom., M.Kom.","sks":3},
+                {"kode":"OAI53","kelas":"A","nama":"Sistem Pendukung Keputusan","hari":"Senin","jam":"12:10 - 14:39","ruang":"J.3.11","dosen":"ALDHI ARI KURNIAWAN, M.Kom.","sks":3},
+                {"kode":"OSE51","kelas":"B","nama":"UI/UX Design","hari":"Rabu","jam":"10:30 - 12:59","ruang":"J.3.03","dosen":"ENDANG SUPRIYATI, S.Kom, M.Kom","sks":3},
+                {"kode":"OSE51","kelas":"A","nama":"UI/UX Design","hari":"Kamis","jam":"10:30 - 12:59","ruang":"J.4.11","dosen":"ENDANG SUPRIYATI, S.Kom, M.Kom","sks":3}
+            ],
+            semester7: [
+                {"kode":"IE71","kelas":"A","nama":"Technopreneurship","hari":"Senin","jam":"11:20 - 12:59","ruang":"J.4.06","dosen":"ARIEF SUSANTO, ST.M.Kom","sks":2},
+                {"kode":"IE72","kelas":"A","nama":"Etika Profesi Teknik","hari":"Senin","jam":"08:00 - 10:29","ruang":"J.4.04","dosen":"EVANITA, S.Kom, M.Kom","sks":2},
+                {"kode":"IE72","kelas":"B","nama":"Etika Profesi Teknik","hari":"Senin","jam":"10:30 - 12:59","ruang":"J.4.04","dosen":"EVANITA, S.Kom, M.Kom","sks":2},
+                {"kode":"IE72","kelas":"E","nama":"Etika Profesi Teknik","hari":"Senin","jam":"13:00 - 15:29","ruang":"J.4.04","dosen":"EVANITA, S.Kom, M.Kom","sks":2},
+                {"kode":"IE72","kelas":"D","nama":"Etika Profesi Teknik","hari":"Rabu","jam":"12:10 - 14:39","ruang":"J.4.04","dosen":"EVANITA, S.Kom, M.Kom","sks":2},
+                {"kode":"IE72","kelas":"C","nama":"Etika Profesi Teknik","hari":"Jumat","jam":"08:00 - 10:29","ruang":"J.4.11","dosen":"EVANITA, S.Kom, M.Kom","sks":2},
+                {"kode":"IFT711","kelas":"X","nama":"SEMINAR PROPOSAL","hari":"Jumat","jam":"16:20 - 18:00","ruang":"J.4.04","dosen":"","sks":1},
+                {"kode":"OAI71","kelas":"A","nama":"Deep Learning","hari":"Selasa","jam":"10:30 - 12:59","ruang":"J.3.11","dosen":"EVANITA, S.Kom, M.Kom","sks":3},
+                {"kode":"ONE71","kelas":"A","nama":"Cloud Computing","hari":"Rabu","jam":"08:00 - 10:29","ruang":"J.4.03","dosen":"M. IMAM GHOZALI, M.Kom.","sks":3},
+                {"kode":"ONE72","kelas":"B","nama":"Komputasi Paralel dan Terdistribusi","hari":"Selasa","jam":"08:00 - 10:29","ruang":"J.4.11","dosen":"ANDRE TRI SAPUTRA, S.Kom., M.Kom.","sks":3},
+                {"kode":"ONE72","kelas":"A","nama":"Komputasi Paralel dan Terdistribusi","hari":"Rabu","jam":"10:30 - 12:59","ruang":"J.4.03","dosen":"ANDRE TRI SAPUTRA, S.Kom., M.Kom.","sks":3},
+                {"kode":"OSE72","kelas":"A","nama":"Pengembangan Game","hari":"Selasa","jam":"08:00 - 09:39","ruang":"J.4.06","dosen":"ALDHI ARI KURNIAWAN, M.Kom.","sks":3}
+            ]
+        };
+
+        // ============================================
+        // STATE
+        // ============================================
+        let data = { semester5: [], semester7: [] };
+        let selected = { semester5: {}, semester7: {} };
+        let taken = {};
+        let currentTab = 'tab5';
+        let fileStatusText = 'Belum ada file dipilih';
+
+        // ============================================
+        // LOCAL STORAGE (persist across reload/browser close)
+        // Catatan: hanya berfungsi saat file ini dibuka langsung
+        // di browser (file:// atau hosting sendiri). Di dalam
+        // preview/artifact Claude, storage browser bisa diblokir
+        // oleh sandbox — aplikasi tetap berjalan normal, hanya
+        // tanpa penyimpanan otomatis.
+        // ============================================
+        const STORAGE_KEY = 'krs_simulasi_state_v1';
+        let storageAvailable = true;
+
+        function saveState() {
+            if (!storageAvailable) return;
+            try {
+                const payload = { data, selected, taken, currentTab, fileStatusText };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                updateStorageIndicator('saved');
+            } catch (err) {
+                storageAvailable = false;
+                console.warn('Local storage tidak tersedia:', err.message);
+                updateStorageIndicator('unavailable');
+            }
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (err) {
+                storageAvailable = false;
+                console.warn('Gagal membaca local storage:', err.message);
+                return null;
+            }
+        }
+
+        function clearSavedData() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (err) {
+                console.warn('Gagal menghapus local storage:', err.message);
+            }
+            data = { semester5: [], semester7: [] };
+            selected = { semester5: {}, semester7: {} };
+            taken = {};
+            currentTab = 'tab5';
+            fileStatusText = 'Belum ada file dipilih';
+            document.getElementById('file-status').textContent = fileStatusText;
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('uploadSection').style.display = '';
+            document.getElementById('jadwal-mingguan').style.display = 'none';
+            document.getElementById('output-area').textContent = '';
+            updateStorageIndicator('cleared');
+            showToast('Data tersimpan sudah dihapus.');
+        }
+
+        function updateStorageIndicator(state) {
+            const messages = {
+                saved: ['Tersimpan otomatis di browser ini', 'var(--ink-faint)', 'Tersimpan otomatis'],
+                restored: ['Dipulihkan dari penyimpanan lokal', 'var(--red)', 'Dipulihkan otomatis'],
+                unavailable: ['Penyimpanan lokal tidak tersedia di tampilan ini', 'var(--taken)', 'Penyimpanan tidak tersedia'],
+                cleared: ['Belum ada data tersimpan', 'var(--ink-faint)', '—']
+            };
+            const [uploadMsg, color, liveMsg] = messages[state] || messages.cleared;
+            const uploadEl = document.getElementById('storage-indicator');
+            if (uploadEl) { uploadEl.textContent = uploadMsg; uploadEl.style.color = color; }
+            const liveEl = document.getElementById('storage-indicator-live');
+            if (liveEl) liveEl.textContent = liveMsg;
+        }
+
+        function showApp() {
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('mainContent').classList.remove('hidden');
+            renderAll();
+            updateSummary();
+            updateJadwalMingguan();
+            switchTab(currentTab);
+        }
+
+        function restoreState() {
+            const saved = loadState();
+            if (!saved || !saved.data || (!saved.data.semester5?.length && !saved.data.semester7?.length)) {
+                updateStorageIndicator('cleared');
+                return false;
+            }
+            data = saved.data || { semester5: [], semester7: [] };
+            selected = saved.selected || { semester5: {}, semester7: {} };
+            taken = saved.taken || {};
+            currentTab = saved.currentTab || 'tab5';
+            fileStatusText = saved.fileStatusText || 'Data dipulihkan';
+            document.getElementById('file-status').textContent = fileStatusText;
+            showApp();
+            updateStorageIndicator('restored');
+            showToast('Sesi sebelumnya dipulihkan otomatis.');
+            return true;
+        }
+
+        // ============================================
+        // PARSE CSV
+        // ============================================
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim() && line.includes(','));
+            if (lines.length < 2) return [];
+
+            const headerLine = lines[0];
+            let current = '';
+            let inQuotes = false;
+            const headers = [];
+            for (let i = 0; i < headerLine.length; i++) {
+                const char = headerLine[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) { headers.push(current.trim()); current = ''; }
+                else current += char;
+            }
+            if (current) headers.push(current.trim());
+            const cleanHeaders = headers.map(h => h.replace(/^"|"$/g, '').trim());
+
+            const result = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                let currentVal = '';
+                let inQuotes2 = false;
+                const values = [];
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') inQuotes2 = !inQuotes2;
+                    else if (char === ',' && !inQuotes2) { values.push(currentVal.trim()); currentVal = ''; }
+                    else currentVal += char;
+                }
+                if (currentVal) values.push(currentVal.trim());
+                const cleanValues = values.map(v => v.replace(/^"|"$/g, '').trim());
+                const row = {};
+                cleanHeaders.forEach((h, idx) => { row[h] = cleanValues[idx] || ''; });
+                result.push(row);
+            }
+            return result;
+        }
+
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        function findField(row, fieldNames) {
+            for (let fn of fieldNames) {
+                if (row[fn] !== undefined && row[fn] !== '') return row[fn];
+                const lowerFn = fn.toLowerCase();
+                for (let key of Object.keys(row)) {
+                    if (key.toLowerCase() === lowerFn) return row[key];
+                }
+            }
+            return '';
+        }
+
+        function loadCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            if (!file) { showToast('Pilih file CSV terlebih dahulu.'); return; }
+            document.getElementById('file-status').textContent = file.name + ' (memproses...)';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const rawData = parseCSV(e.target.result);
+                    const semester5Codes = ['GS51', 'IE51', 'IE52', 'IE53', 'IE54', 'IE55', 'IE56', 'IE57', 'IE73', 'OAI51', 'OAI53', 'OSE51'];
+                    const semester7Codes = ['IE71', 'IE72', 'IFT711', 'OAI71', 'ONE71', 'ONE72', 'OSE72'];
+
+                    const formatItems = (items, codes) => {
+                        return items.filter(row => {
+                            const kode = findField(row, ['kode', 'Kode', 'kode_makul', 'KODE']);
+                            return kode && codes.includes(kode);
+                        }).map(row => {
+                            return {
+                                kode: findField(row, ['kode', 'Kode', 'kode_makul', 'KODE']) || '',
+                                kelas: findField(row, ['kelas', 'Kelas', 'kelas_makul', 'KELAS']) || '',
+                                nama: findField(row, ['nama', 'Nama', 'nama_makul', 'NAMA', 'nama_matakuliah']) || '',
+                                hari: findField(row, ['hari', 'Hari', 'day']) || 'Tidak tersedia',
+                                jam: findField(row, ['jam', 'Jam', 'time', 'waktu']) || 'Tidak tersedia',
+                                ruang: findField(row, ['ruang', 'Ruang', 'room']) || 'Tidak tersedia',
+                                dosen: findField(row, ['dosen', 'Dosen', 'dosen_makul']) || '',
+                                sks: parseInt(findField(row, ['sks', 'SKS'])) || 0
+                            };
+                        }).filter(item => item.kode && item.hari !== 'Tidak tersedia' && item.hari);
+                    };
+
+                    data.semester5 = formatItems(rawData, semester5Codes);
+                    data.semester7 = formatItems(rawData, semester7Codes);
+
+                    fileStatusText = file.name + ' — ' + (data.semester5.length + data.semester7.length) + ' data';
+                    document.getElementById('file-status').textContent = fileStatusText;
+                    showToast('File berhasil diproses.');
+                    initApp();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Error: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function loadSampleData() {
+            data.semester5 = SAMPLE_DATA.semester5;
+            data.semester7 = SAMPLE_DATA.semester7;
+            fileStatusText = 'Menggunakan data sample';
+            document.getElementById('file-status').textContent = fileStatusText;
+            showToast('Data sample dimuat.');
+            initApp();
+        }
+
+        function initApp() {
+            selected = { semester5: {}, semester7: {} };
+            taken = {};
+            currentTab = 'tab5';
+            showApp();
+            saveState();
+        }
+
+        // ============================================
+        // RENDER
+        // ============================================
+        function parseTime(timeStr) {
+            const match = timeStr.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+            if (match) return { start: parseInt(match[1]) * 100 + parseInt(match[2]), end: parseInt(match[3]) * 100 + parseInt(match[4]) };
+            return null;
+        }
+
+        function checkConflicts(items) {
+            const conflicts = [];
+            const byDay = {};
+            items.forEach(item => {
+                if (!byDay[item.hari]) byDay[item.hari] = [];
+                byDay[item.hari].push(item);
+            });
+            Object.keys(byDay).forEach(day => {
+                const items2 = byDay[day];
+                for (let i = 0; i < items2.length; i++) {
+                    for (let j = i + 1; j < items2.length; j++) {
+                        const t1 = parseTime(items2[i].jam);
+                        const t2 = parseTime(items2[j].jam);
+                        if (t1 && t2 && !(t1.end <= t2.start || t2.end <= t1.start)) {
+                            conflicts.push({ hari: day, mk1: items2[i].kode + '-' + items2[i].kelas, jam1: items2[i].jam, mk2: items2[j].kode + '-' + items2[j].kelas, jam2: items2[j].jam });
+                        }
+                    }
+                }
+            });
+            return conflicts;
+        }
+
+        function toggleKelas(semester, kode, kelas) {
+            const sem = semester === 'semester5' ? 'semester5' : 'semester7';
+            if (taken[kode]) { showToast('Mata kuliah ini sudah diambil.'); return; }
+            if (selected[sem][kode] === kelas) selected[sem][kode] = null;
+            else selected[sem][kode] = kelas;
+            renderAll();
+            updateSummary();
+            updateJadwalMingguan();
+            saveState();
+        }
+
+        function renderMKList(semester, containerId) {
+            const container = document.getElementById(containerId);
+            const sem = semester === 'semester5' ? 'semester5' : 'semester7';
+            const items = data[sem];
+            const semSelected = selected[sem] || {};
+            const groups = {};
+            items.forEach(item => { if (!groups[item.kode]) groups[item.kode] = []; groups[item.kode].push(item); });
+
+            let html = '';
+            const groupKeys = Object.keys(groups);
+            if (groupKeys.length === 0) {
+                html = '<p style="color:#718096;text-align:center;padding:20px;">Tidak ada data. Upload CSV atau gunakan sample.</p>';
+            }
+            groupKeys.forEach(kode => {
+                const group = groups[kode];
+                const name = group[0].nama;
+                const sks = group[0].sks;
+                const isTaken = taken[kode] || false;
+                html += `<div class="mk-group">`;
+                html += `<div class="mk-header"><span>${kode} — ${name}</span><span>${isTaken ? `<span class="taken-badge">Sudah Diambil</span>` : `<span class="sks-badge-header">${sks} SKS</span>`}</span></div>`;
+                html += `<div class="mk-body">`;
+                group.forEach(item => {
+                    const isSelected = semSelected[kode] === item.kelas && !isTaken;
+                    html += `
+                        <div class="kelas-item ${isSelected ? 'selected' : ''} ${isTaken ? 'taken' : ''}" onclick="toggleKelas('${sem}', '${kode}', '${item.kelas}')">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} ${isTaken ? 'disabled' : ''} onclick="event.stopPropagation(); toggleKelas('${sem}', '${kode}', '${item.kelas}')">
+                            <div class="info">
+                                <span class="kelas-label">${item.kelas}</span>
+                                <span class="time">${item.hari} ${item.jam}</span>
+                                <span class="ruang">${item.ruang}</span>
+                                <span class="dosen">${item.dosen}</span>
+                            </div>
+                            <span class="sks-badge">${item.sks} SKS</span>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderAll() {
+            renderMKList('semester5', 'mk-list-5');
+            renderMKList('semester7', 'mk-list-7');
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            saveState();
+        }
+
+        function getSelectedItems() {
+            const result = [];
+            ['semester5', 'semester7'].forEach(sem => {
+                const semData = data[sem];
+                const semSelected = selected[sem] || {};
+                semData.forEach(item => {
+                    const isTaken = taken[item.kode] || false;
+                    const isSelected = semSelected[item.kode] === item.kelas;
+                    if (isTaken || isSelected) {
+                        result.push({ ...item, semester: sem === 'semester5' ? 5 : 7, status: isTaken ? 'taken' : 'selected' });
+                    }
+                });
+            });
+            return result;
+        }
+
+        function updateSummary() {
+            const selectedItems = getSelectedItems();
+            let totalSKS = 0, takenCount = 0, selectedCount = 0;
+            selectedItems.forEach(item => {
+                totalSKS += parseInt(item.sks);
+                if (item.status === 'taken') takenCount++;
+                else selectedCount++;
+            });
+            document.getElementById('total-sks-display').textContent = totalSKS;
+            document.getElementById('taken-display').textContent = takenCount;
+            const totalMK = data.semester5.length + data.semester7.length;
+            const availableMK = totalMK - takenCount;
+            document.getElementById('total-mk-display').textContent = availableMK + ' (dari ' + totalMK + ')';
+
+            const summaryDiv = document.getElementById('summary-list');
+            let html = '';
+            if (selectedItems.length === 0) {
+                html = '<p style="color:#718096;">Belum ada pilihan</p>';
+            } else {
+                const sem5 = selectedItems.filter(i => i.semester === 5);
+                const sem7 = selectedItems.filter(i => i.semester === 7);
+                if (sem5.length > 0) {
+                    html += '<div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px;">Semester 5</div>';
+                    sem5.forEach(item => {
+                        const label = item.status === 'taken' ? '✓' : item.kelas;
+                        html += `<div class="summary-item"><span class="mk">${item.kode}</span><span class="kelas ${item.status === 'taken' ? 'taken' : ''}">${label}</span><span class="time">${item.hari} ${item.jam}</span></div>`;
+                    });
+                }
+                if (sem7.length > 0) {
+                    html += '<div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:12px;">Semester 7</div>';
+                    sem7.forEach(item => {
+                        const label = item.status === 'taken' ? '✓' : item.kelas;
+                        html += `<div class="summary-item"><span class="mk">${item.kode}</span><span class="kelas ${item.status === 'taken' ? 'taken' : ''}">${label}</span><span class="time">${item.hari} ${item.jam}</span></div>`;
+                    });
+                }
+                html += `<div class="summary-total">Total SKS: ${totalSKS} (${selectedCount} dipilih, ${takenCount} sudah diambil)</div>`;
+            }
+
+            const selectedOnly = selectedItems.filter(item => item.status !== 'taken');
+            const conflicts = checkConflicts(selectedOnly);
+            const statusDiv = document.getElementById('status-display');
+            if (conflicts.length > 0) {
+                statusDiv.innerHTML = `${conflicts.length} bentrok ditemukan`;
+                statusDiv.style.color = '#e53e3e';
+                html += `<div class="summary-conflict"><strong>Bentrok:</strong><ul>`;
+                conflicts.forEach(c => { html += `<li>${c.hari}: ${c.mk1} (${c.jam1}) bentrok dengan ${c.mk2} (${c.jam2})</li>`; });
+                html += `</ul></div>`;
+            } else if (selectedCount > 0) {
+                statusDiv.innerHTML = `Tidak ada bentrok`;
+                statusDiv.style.color = '#48bb78';
+            } else {
+                statusDiv.innerHTML = `Belum ada pilihan`;
+                statusDiv.style.color = '#ecc94b';
+            }
+            summaryDiv.innerHTML = html;
+        }
+
+        // ============================================
+        // JADWAL MINGGUAN + EXPORT
+        // ============================================
+        function updateJadwalMingguan() {
+            const selectedItems = getSelectedItems().filter(item => item.status === 'selected');
+            const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+            const dayMap = {};
+            days.forEach(d => dayMap[d] = []);
+            selectedItems.forEach(item => {
+                if (item.hari && dayMap[item.hari]) dayMap[item.hari].push(item);
+            });
+            days.forEach(d => {
+                dayMap[d].sort((a, b) => {
+                    const t1 = parseTime(a.jam);
+                    const t2 = parseTime(b.jam);
+                    return (t1 ? t1.start : 0) - (t2 ? t2.start : 0);
+                });
+            });
+
+            let totalSKS = selectedItems.reduce((sum, i) => sum + parseInt(i.sks), 0);
+            document.getElementById('footer-sks').textContent = totalSKS;
+            document.getElementById('footer-info').textContent = selectedItems.length + ' mata kuliah dipilih';
+
+            days.forEach(day => {
+                const cell = document.getElementById(day.toLowerCase());
+                const items = dayMap[day] || [];
+                if (items.length === 0) {
+                    cell.innerHTML = '<span style="color:#a0aec0;font-size:13px;">— Tidak ada kelas —</span>';
+                } else {
+                    let html = '';
+                    items.forEach(item => {
+                        html += `
+                            <div class="mk-item">
+                                <div><span class="kode">${item.kode} (${item.kelas})</span> <span class="nama-mk">${item.nama}</span></div>
+                                <div><span class="ruang">${item.jam} | ${item.ruang}</span></div>
+                                <div class="dosen-mk">${item.dosen || '-'}</div>
+                            </div>
+                        `;
+                    });
+                    cell.innerHTML = html;
+                }
+            });
+
+            document.getElementById('jadwal-subjudul').textContent = 'Semester 5 & 7 | Total SKS: ' + totalSKS + ' | ' + selectedItems.length + ' mata kuliah';
+        }
+
+        function exportImage() {
+            const selectedItems = getSelectedItems().filter(item => item.status === 'selected');
+            if (selectedItems.length === 0) { showToast('Belum ada pilihan kelas.'); return; }
+            document.getElementById('jadwal-mingguan').style.display = 'block';
+            updateJadwalMingguan();
+
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                const element = document.getElementById('jadwal-mingguan');
+                html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: element.scrollWidth,
+                    height: element.scrollHeight,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                }).then(canvas => {
+                    overlay.style.display = 'none';
+                    const link = document.createElement('a');
+                    link.download = 'jadwal_kuliah_' + new Date().toISOString().slice(0,10) + '.jpg';
+                    link.href = canvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                    showToast('Gambar berhasil di-download.');
+                }).catch(err => {
+                    overlay.style.display = 'none';
+                    console.error(err);
+                    showToast('Gagal export gambar: ' + err.message);
+                });
+            }, 500);
+        }
+
+        function saveSelection() {
+            const items = getSelectedItems();
+            const selectedOnly = items.filter(item => item.status !== 'taken');
+            if (selectedOnly.length === 0) { showToast('Belum ada pilihan kelas.'); return; }
+
+            const output = document.getElementById('output-area');
+            let result = '📋 RINGKASAN KRS\n' + '='.repeat(50) + '\n';
+            const sem5 = items.filter(i => i.semester === 5);
+            const sem7 = items.filter(i => i.semester === 7);
+            if (sem5.length > 0) {
+                result += '\nSEMESTER 5:\n';
+                sem5.forEach(item => {
+                    const label = item.status === 'taken' ? 'SUDAH DIAMBIL' : item.kelas;
+                    result += `  ${item.kode}-${label} | ${item.nama} | ${item.hari} ${item.jam} | ${item.ruang} | ${item.dosen || '-'}\n`;
+                });
+            }
+            if (sem7.length > 0) {
+                result += '\nSEMESTER 7:\n';
+                sem7.forEach(item => {
+                    const label = item.status === 'taken' ? 'SUDAH DIAMBIL' : item.kelas;
+                    result += `  ${item.kode}-${label} | ${item.nama} | ${item.hari} ${item.jam} | ${item.ruang} | ${item.dosen || '-'}\n`;
+                });
+            }
+            result += '='.repeat(50) + '\n';
+            const totalSKS = items.reduce((sum, i) => sum + parseInt(i.sks), 0);
+            result += `Total SKS: ${totalSKS}\n`;
+            const conflicts = checkConflicts(items.filter(item => item.status !== 'taken'));
+            if (conflicts.length > 0) {
+                result += '\nBENTROK DITEMUKAN:\n';
+                conflicts.forEach(c => result += `  - ${c.hari}: ${c.mk1} (${c.jam1}) bentrok dengan ${c.mk2} (${c.jam2})\n`);
+            } else {
+                result += '\nTIDAK ADA BENTROK';
+            }
+            output.textContent = result;
+
+            const jsonData = {
+                timestamp: new Date().toISOString(),
+                selected: items,
+                total_sks: totalSKS,
+                conflicts: conflicts
+            };
+            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `krs_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('File JSON berhasil di-download.');
+        }
+
+        function resetSelection() {
+            selected = { semester5: {}, semester7: {} };
+            renderAll();
+            updateSummary();
+            updateJadwalMingguan();
+            document.getElementById('output-area').textContent = '';
+            document.getElementById('jadwal-mingguan').style.display = 'none';
+            saveState();
+            showToast('Reset selesai');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        // ============================================
+        // AUTO-RESTORE ON LOAD
+        // ============================================
+        restoreState();
+    </script>
+</body>
+</html>
