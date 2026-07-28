@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulasi KRS UMK Teknik Informatika</title>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -351,7 +349,7 @@
 
 <script>
     // ============================================
-    // SUPABASE CONFIG - SUDAH PAKAI PUNYA ANDA
+    // SUPABASE CONFIG
     // ============================================
     const SUPABASE_URL = 'https://wfxudgybbrsibzfyegcl.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVkZ3liYnJzaWJ6ZnllZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTQ3ODYsImV4cCI6MjEwMDc5MDc4Nn0.zZoM5I0GMJsD0huuWLR-ygCFxbSW2oWa5cqNEtrxvVA';
@@ -360,10 +358,6 @@
     let supabaseConnected = false;
 
     try {
-        // FIX: SDK Supabase v2 dari CDN mendaftarkan objek global bernama
-        // `supabase`, bukan `supabase_js`. Sebelumnya kode ini memanggil
-        // `supabase_js.createClient(...)` yang menyebabkan
-        // "supabase_js is not defined".
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         supabaseConnected = true;
         document.getElementById('statusDot').className = 'dot connected';
@@ -401,27 +395,17 @@
     const NIM_STORAGE_KEY = 'krs_logged_in_nim_v1';
     const AUTH_TABLE = 'mahasiswa_akun';
     let currentNim = null;
-    // Hosting statis di Wasmer (provider: staticfile) TIDAK punya opsi
-    // SPA-fallback/rewrite di app.yaml, jadi path cantik (/schedule/xxx) akan
-    // 404 di server sebelum JS sempat jalan. Karena itu link berbagi pakai
-    // query param di root ("/?s=xxx") yang selalu aman di static hosting apa pun.
-    const SHARE_QUERY_PARAM = 's';
+    const SHARE_QUERY_PARAM = 's'; // Masih dipakai untuk fallback
     let storageAvailable = true;
     let dbSaved = false;
 
-    // ============================================
-    // USER ID = NIM mahasiswa yang sedang login.
-    // "Simpan Pilihan" / "Muat Pilihan" dikaitkan ke NIM ini
-    // supaya bisa dibuka lagi dari device manapun dengan NIM+password yang sama.
-    // ============================================
     function getUserId() {
         if (!currentNim) { showToast('⚠️ Silakan masuk dengan NIM dulu.'); throw new Error('Belum login'); }
         return currentNim;
     }
 
-    // Generator kode acak pendek (dipakai untuk share id)
     function generateShareId(length = 7) {
-        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; // tanpa 0/O/1/l/I biar gak ambigu
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
         let result = '';
         const arr = new Uint32Array(length);
         crypto.getRandomValues(arr);
@@ -429,16 +413,12 @@
         return result;
     }
 
-    // Hash password dengan SHA-256 (Web Crypto). Tidak sekuat bcrypt/Supabase Auth,
-    // tapi cukup untuk mencegah password tersimpan sebagai plain text.
     async function hashPassword(password) {
         const enc = new TextEncoder().encode(password);
         const buf = await crypto.subtle.digest('SHA-256', enc);
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Login kalau NIM sudah terdaftar (cocokkan hash password),
-    // atau daftar otomatis kalau NIM ini belum pernah dipakai.
     async function handleLogin() {
         const nimInput = document.getElementById('nimInput').value.trim();
         const passInput = document.getElementById('passInput').value;
@@ -471,7 +451,6 @@
         }
     }
 
-    // Dipanggil setelah login/registrasi berhasil, atau saat auto-login dari localStorage.
     async function afterLogin(nim) {
         currentNim = nim;
         try { localStorage.setItem(NIM_STORAGE_KEY, nim); } catch (e) {}
@@ -531,12 +510,10 @@
                 return;
             }
 
-            // Reset data
             data = {1:[],3:[],5:[],7:[],8:[]};
             selected = {1:{},3:{},5:{},7:{},8:{}};
             taken = {};
 
-            // Populate data
             for (let item of mkData) {
                 const sem = item.semester;
                 if (!data[sem]) data[sem] = [];
@@ -571,7 +548,7 @@
     }
 
     // ============================================
-    // PILIHAN USER (tabel krs_pilihan)
+    // PILIHAN USER
     // ============================================
     async function savePilihanToSupabase() {
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung.'); return; }
@@ -582,7 +559,6 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             const uid = getUserId();
 
-            // Ganti semua baris lama milik user ini dengan pilihan yang sekarang
             const { error: delErr } = await supabaseClient.from('krs_pilihan').delete().eq('user_id', uid);
             if (delErr) throw delErr;
 
@@ -636,7 +612,7 @@
     }
 
     // ============================================
-    // SHARE LINK FUNCTIONS
+    // SHARE LINK FUNCTIONS (UBAH DI SINI AGAR LINK JADI /schedule/id)
     // ============================================
     async function generateShareLink() {
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa membuat link singkat.'); return; }
@@ -661,7 +637,6 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
 
             let shareId = null, lastErr = null;
-            // Coba beberapa kali kalau kebetulan share_id-nya sudah dipakai (unique constraint)
             for (let attempt = 0; attempt < 5 && !shareId; attempt++) {
                 const candidate = generateShareId(7);
                 const { error: err } = await supabaseClient.from('krs_shared').insert({
@@ -676,7 +651,9 @@
             document.getElementById('loadingOverlay').style.display = 'none';
             if (!shareId) throw (lastErr || new Error('Gagal membuat kode berbagi yang unik.'));
 
-            const shareUrl = window.location.origin + window.location.pathname + '?' + SHARE_QUERY_PARAM + '=' + shareId;
+            // ✅ UBAH DI SINI: Gunakan /schedule/ alih-alih ?s=
+            const shareUrl = window.location.origin + '/schedule/' + shareId;
+            
             const area = document.getElementById('share-link-area');
             area.style.display = 'block';
             document.getElementById('share-link-url').textContent = shareUrl;
@@ -705,7 +682,6 @@
         });
     }
 
-    // Muat jadwal dari share_id yang tersimpan di tabel krs_shared (link pendek /schedule/{id})
     async function loadFromShareId(shareId) {
         if (!supabaseConnected) { showToast('❌ Supabase tidak terhubung, tidak bisa memuat link berbagi.'); return; }
         try {
@@ -736,7 +712,6 @@
         }
     }
 
-    // Fallback untuk link lama berformat ?share=<base64> (kalau masih ada yang beredar)
     function loadFromShareLink() {
         const url = new URL(window.location.href);
         const shareParam = url.searchParams.get('share');
@@ -758,7 +733,6 @@
         }
     }
 
-    // Helper bersama: taruh array item {k,kl,n,h,j,r,ds,s,sk,kat,sem,no} ke state data/selected
     function applySharedPayload(items) {
         data = {1:[],3:[],5:[],7:[],8:[]};
         selected = {1:{},3:{},5:{},7:{},8:{}};
@@ -790,12 +764,8 @@
 
     function checkShareOnLoad() {
         const url = new URL(window.location.href);
-
-        // Format baru (aman untuk static hosting apa pun): /?s={share_id}
         const shortId = url.searchParams.get(SHARE_QUERY_PARAM);
         if (shortId) { setTimeout(() => loadFromShareId(shortId), 300); return; }
-
-        // Format lama: ?share=<base64> — tetap didukung untuk link yang sudah terlanjur dibagikan
         if (url.searchParams.has('share')) {
             setTimeout(loadFromShareLink, 500);
         }
